@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.1] — 2026-03-01
+
 ### Added
 
 - CII XML generation from typed TypeScript input objects
@@ -28,3 +30,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.0.1]: https://github.com/StackForge-EU/factur-x/compare/v1.0.0...v1.0.1
