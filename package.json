@@ -1,0 +1,81 @@
+{
+  "name": "@stackforge-eu/factur-x",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Embed Factur-X, ZUGFeRD, and XRechnung structured invoice XML into PDF/A-3 documents",
+  "keywords": [
+    "factur-x",
+    "zugferd",
+    "xrechnung",
+    "en16931",
+    "cii",
+    "pdf",
+    "pdf-a3",
+    "invoice",
+    "e-invoice",
+    "e-invoicing",
+    "eu",
+    "xml"
+  ],
+  "license": "EUPL-1.2",
+  "author": "StackForge UG",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StackForge-EU/factur-x.git"
+  },
+  "homepage": "https://www.stack-forge.eu",
+  "bugs": {
+    "url": "https://github.com/StackForge-EU/factur-x/issues"
+  },
+  "sideEffects": false,
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "schema/**/*.xsd",
+    "schema/README.md",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "validate": "tsc --noEmit",
+    "prepublishOnly": "npm run validate && npm run lint && npm run test -- --run && npm run build"
+  },
+  "dependencies": {
+    "libxml2-wasm": "^0.6.0",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.8.1",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

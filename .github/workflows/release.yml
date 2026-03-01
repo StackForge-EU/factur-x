@@ -1,0 +1,90 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Semver bump type"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Upgrade npm (OIDC trusted publishing requires >=11.5.1)
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Validate
+        run: npm run validate
+
+      - name: Test
+        run: npm run test -- --run
+
+      - name: Bump version
+        id: version
+        run: |
+          OLD_VERSION=$(node -p "require('./package.json').version")
+          npm version ${{ inputs.bump }} --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+
+          node -e "
+            const f = require('fs');
+            const j = JSON.parse(f.readFileSync('jsr.json', 'utf8'));
+            j.version = '${NEW_VERSION}';
+            f.writeFileSync('jsr.json', JSON.stringify(j, null, 2) + '\n');
+          "
+
+          echo "old=${OLD_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "new=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Update changelog & extract release notes
+        run: >
+          node .github/scripts/update-changelog.mjs
+          ${{ steps.version.outputs.new }}
+          ${{ steps.version.outputs.old }}
+          "${{ github.server_url }}/${{ github.repository }}"
+
+      - name: Commit, tag, push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json jsr.json CHANGELOG.md
+          git commit -m "release: v${{ steps.version.outputs.new }}"
+          git tag "v${{ steps.version.outputs.new }}"
+          git push origin HEAD --follow-tags
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.new }}
+          name: v${{ steps.version.outputs.new }}
+          body_path: RELEASE_NOTES.md
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+
+      - name: Publish to JSR
+        run: npx jsr publish

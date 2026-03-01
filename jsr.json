@@ -1,0 +1,8 @@
+{
+  "name": "@stackforge-eu/factur-x",
+  "version": "0.1.0",
+  "exports": "./src/index.ts",
+  "publish": {
+    "include": ["src/**/*.ts", "schema/**/*.xsd", "schema/README.md", "LICENSE", "README.md"]
+  }
+}
