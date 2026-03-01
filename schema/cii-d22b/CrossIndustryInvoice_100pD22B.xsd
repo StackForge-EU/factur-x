@@ -7,9 +7,9 @@
     targetNamespace="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"
     elementFormDefault="qualified"
     version="100.D22B">
-  <xsd:import namespace="urn:un:unece:uncefact:data:standard:QualifiedDataType:100" schemaLocation="CrossIndustryInvoice_100pD22B_urn_un_unece_uncefact_data_standard_QualifiedDataType_100.xsd"/>
-  <xsd:import namespace="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100" schemaLocation="CrossIndustryInvoice_100pD22B_urn_un_unece_uncefact_data_standard_ReusableAggregateBusinessInformationEntity_100.xsd"/>
-  <xsd:import namespace="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100" schemaLocation="CrossIndustryInvoice_100pD22B_urn_un_unece_uncefact_data_standard_UnqualifiedDataType_100.xsd"/>
+  <xsd:import namespace="urn:un:unece:uncefact:data:standard:QualifiedDataType:100" schemaLocation="CrossIndustryInvoice_100pD22B_QualifiedDataType_100.xsd"/>
+  <xsd:import namespace="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100" schemaLocation="CrossIndustryInvoice_100pD22B_ReusableAggregateBusinessInformationEntity_100.xsd"/>
+  <xsd:import namespace="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100" schemaLocation="CrossIndustryInvoice_100pD22B_UnqualifiedDataType_100.xsd"/>
   <xsd:element name="CrossIndustryInvoice" type="rsm:CrossIndustryInvoiceType"/>
   <xsd:complexType name="CrossIndustryInvoiceType">
     <xsd:annotation>

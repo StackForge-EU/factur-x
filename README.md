@@ -1,6 +1,6 @@
 # Embed Structured Invoices into PDF
 
-![Created by](https://s3.stack-forge.eu/media/badges/createdby.svg)
+[![Created by](https://s3.stack-forge.eu/media/badges/createdby.svg?v=1)](https://stack-forge.eu)
 [![License: EUPL-1.2](https://img.shields.io/badge/License-EUPL--1.2-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-3178c6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/node/v/@stackforge-eu/factur-x?logo=node.js)](https://nodejs.org)
@@ -80,7 +80,14 @@ import { embedFacturX, Profile } from "jsr:@stackforge-eu/factur-x";
 ### Embed Factur-X into an existing PDF
 
 ```typescript
-import { embedFacturX, DocumentTypeCode, UnitCode, VatCategoryCode, Profile, Flavor } from "@stackforge-eu/factur-x";
+import {
+  embedFacturX,
+  DocumentTypeCode,
+  UnitCode,
+  VatCategoryCode,
+  Profile,
+  Flavor,
+} from "@stackforge-eu/factur-x";
 import { readFile, writeFile } from "fs/promises";
 
 const pdfBuffer = await readFile("invoice.pdf");
@@ -121,7 +128,14 @@ const result = await embedFacturX({
       duePayableAmount: 1785,
       currency: "EUR",
     },
-    vatBreakdown: [{ categoryCode: VatCategoryCode.STANDARD_RATE, ratePercent: 19, taxableAmount: 1500, taxAmount: 285 }],
+    vatBreakdown: [
+      {
+        categoryCode: VatCategoryCode.STANDARD_RATE,
+        ratePercent: 19,
+        taxableAmount: 1500,
+        taxAmount: 285,
+      },
+    ],
     payment: {
       meansCode: "58",
       iban: "DE89370400440532013000",
@@ -173,7 +187,14 @@ const { xml } = toXRechnung({
     duePayableAmount: 1190,
     currency: "EUR",
   },
-  vatBreakdown: [{ categoryCode: VatCategoryCode.STANDARD_RATE, ratePercent: 19, taxableAmount: 1000, taxAmount: 190 }],
+  vatBreakdown: [
+    {
+      categoryCode: VatCategoryCode.STANDARD_RATE,
+      ratePercent: 19,
+      taxableAmount: 1000,
+      taxAmount: 190,
+    },
+  ],
 });
 
 // Upload `xml` to ZRE / OZG-RE / PEPPOL

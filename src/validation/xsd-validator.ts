@@ -84,7 +84,7 @@ function findSchemaDir(startDir: string): string {
  * @returns Absolute path to the main XSD file
  */
 function resolveXsdPath(profile: Profile, schemaBasePath?: string): string {
-  const currentDir = path.dirname(fileURLToPath(import.meta.url));
+  const currentDir = path.dirname(fileURLToPath((import.meta as ImportMeta & { url: string }).url));
   const base = schemaBasePath ? path.join(schemaBasePath, "schema") : findSchemaDir(currentDir);
   const profileDir = path.join(base, PROFILE_SCHEMA_DIRS[profile]);
   const xsdFile = path.join(profileDir, PROFILE_MAIN_XSD[profile]);
