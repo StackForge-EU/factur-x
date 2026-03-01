@@ -7,6 +7,7 @@
 ![Deno](https://img.shields.io/badge/deno-%3E%3D2.0.0-brightgreen?logo=deno)
 ![JSR Version](https://img.shields.io/jsr/v/@stackforge-eu/factur-x?logo=jsr)
 [![npm version](https://img.shields.io/npm/v/@stackforge-eu/factur-x?logo=npm&color=cb3837)](https://www.npmjs.com/package/@stackforge-eu/factur-x)
+
 **Generate and embed Factur-X, ZUGFeRD, and XRechnung compliant CII XML into PDF/A-3 invoices.**
 
 This TypeScript/Node.js package takes a simple, typed invoice input object and:
