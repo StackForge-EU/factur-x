@@ -9,6 +9,7 @@
  * @license EUPL-1.2
  */
 
+import type { Buffer } from "node:buffer";
 import { Profile } from "../flavors/constants";
 import {
   PDFDocument,

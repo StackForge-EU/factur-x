@@ -15,6 +15,7 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 import { Profile } from "../flavors/constants";
 import { PROFILE_SCHEMA_DIRS, PROFILE_MAIN_XSD } from "../flavors/constants";
 
@@ -83,7 +84,8 @@ function findSchemaDir(startDir: string): string {
  * @returns Absolute path to the main XSD file
  */
 function resolveXsdPath(profile: Profile, schemaBasePath?: string): string {
-  const base = schemaBasePath ? path.join(schemaBasePath, "schema") : findSchemaDir(__dirname);
+  const currentDir = path.dirname(fileURLToPath(import.meta.url));
+  const base = schemaBasePath ? path.join(schemaBasePath, "schema") : findSchemaDir(currentDir);
   const profileDir = path.join(base, PROFILE_SCHEMA_DIRS[profile]);
   const xsdFile = path.join(profileDir, PROFILE_MAIN_XSD[profile]);
 

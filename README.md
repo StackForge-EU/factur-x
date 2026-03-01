@@ -1,7 +1,12 @@
 # Embed Structured Invoices into PDF
 
+![Created by](https://s3.stack-forge.eu/media/badges/createdby.svg)
 [![License: EUPL-1.2](https://img.shields.io/badge/License-EUPL--1.2-blue.svg)](LICENSE)
-
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-3178c6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/node/v/@stackforge-eu/factur-x?logo=node.js)](https://nodejs.org)
+![Deno](https://img.shields.io/badge/deno-%3E%3D2.0.0-brightgreen?logo=deno)
+![JSR Version](https://img.shields.io/jsr/v/@stackforge-eu/factur-x?logo=jsr)
+[![npm version](https://img.shields.io/npm/v/@stackforge-eu/factur-x?logo=npm&color=cb3837)](https://www.npmjs.com/package/@stackforge-eu/factur-x)
 **Generate and embed Factur-X, ZUGFeRD, and XRechnung compliant CII XML into PDF/A-3 invoices.**
 
 This TypeScript/Node.js package takes a simple, typed invoice input object and:

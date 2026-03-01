@@ -8,6 +8,7 @@
  * @license EUPL-1.2
  */
 
+import type { Buffer } from "node:buffer";
 import { PDFDocument, PDFName, AFRelationship } from "pdf-lib";
 
 import type { FacturXInvoiceInput } from "../types/input";
