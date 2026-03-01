@@ -37,8 +37,16 @@ This TypeScript/Node.js package takes a simple, typed invoice input object and:
 
 ## Installation
 
+### Node.js
+
 ```bash
 npm install @stackforge-eu/factur-x
+```
+
+### Deno
+
+```typescript
+import { embedFacturX, Profile } from "jsr:@stackforge-eu/factur-x";
 ```
 
 ---
@@ -248,6 +256,19 @@ Validates XML against the official Factur-X XSD schema using libxml2-wasm.
 Returns configuration for a flavor.
 
 See the [full type definitions](docs/INPUT_OBJECT_SPECIFICATION.md) for all interfaces.
+
+---
+
+## Development
+
+```bash
+npm ci                # Install dependencies
+npm run validate      # Type-check with tsc
+npm run lint          # Lint with ESLint
+npm run test -- --run # Run vitest suite
+npm run test:deno     # Run Deno compatibility tests (requires Deno >= 2.0)
+npm run build         # Build with tsup (CJS + ESM)
+```
 
 ---
 

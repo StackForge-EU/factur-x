@@ -18,16 +18,17 @@
   "workspace": {
     "packageJson": {
       "dependencies": [
-        "npm:@types/node@^20.10.0",
-        "npm:@typescript-eslint/eslint-plugin@6",
-        "npm:@typescript-eslint/parser@6",
-        "npm:eslint@8",
+        "npm:@eslint/js@^10.0.1",
+        "npm:@types/node@^20.19.35",
+        "npm:eslint@^10.0.2",
+        "npm:globals@^17.3.0",
         "npm:libxml2-wasm@0.6",
         "npm:pdf-lib@^1.17.1",
         "npm:prettier@^3.8.1",
-        "npm:tsup@8",
-        "npm:typescript@^5.3.0",
-        "npm:vitest@1"
+        "npm:tsup@^8.5.1",
+        "npm:typescript-eslint@^8.56.1",
+        "npm:typescript@^5.9.3",
+        "npm:vitest@^4.0.18"
       ]
     }
   }

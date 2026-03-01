@@ -1,3 +1,4 @@
+// @ts-nocheck — this file is type-checked by Deno, not tsc/VSCode
 /**
  * Deno compatibility tests.
  *

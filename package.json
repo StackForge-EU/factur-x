@@ -55,6 +55,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest",
+    "test:deno": "deno test --allow-read --allow-env --allow-ffi --unstable-sloppy-imports tests/deno_compat_test.ts",
     "lint": "eslint",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
