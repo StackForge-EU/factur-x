@@ -80,7 +80,7 @@ import { embedFacturX, Profile } from "jsr:@stackforge-eu/factur-x";
 ### Embed Factur-X into an existing PDF
 
 ```typescript
-import { embedFacturX, DocumentTypeCode, UnitCode, Profile, Flavor } from "@stackforge-eu/factur-x";
+import { embedFacturX, DocumentTypeCode, UnitCode, VatCategoryCode, Profile, Flavor } from "@stackforge-eu/factur-x";
 import { readFile, writeFile } from "fs/promises";
 
 const pdfBuffer = await readFile("invoice.pdf");
@@ -109,7 +109,7 @@ const result = await embedFacturX({
         quantity: 10,
         unitCode: UnitCode.HOUR,
         unitPrice: 150,
-        vatCategoryCode: "S",
+        vatCategoryCode: VatCategoryCode.STANDARD_RATE,
         vatRatePercent: 19,
       },
     ],
@@ -121,7 +121,7 @@ const result = await embedFacturX({
       duePayableAmount: 1785,
       currency: "EUR",
     },
-    vatBreakdown: [{ categoryCode: "S", ratePercent: 19, taxableAmount: 1500, taxAmount: 285 }],
+    vatBreakdown: [{ categoryCode: VatCategoryCode.STANDARD_RATE, ratePercent: 19, taxableAmount: 1500, taxAmount: 285 }],
     payment: {
       meansCode: "58",
       iban: "DE89370400440532013000",
@@ -138,7 +138,7 @@ await writeFile("invoice-zugferd.pdf", result.pdf);
 ### Generate XRechnung XML (no PDF)
 
 ```typescript
-import { toXRechnung } from "@stackforge-eu/factur-x";
+import { toXRechnung, VatCategoryCode } from "@stackforge-eu/factur-x";
 
 const { xml } = toXRechnung({
   document: {
@@ -161,7 +161,7 @@ const { xml } = toXRechnung({
       name: "Service",
       quantity: 1,
       unitPrice: 1000,
-      vatCategoryCode: "S",
+      vatCategoryCode: VatCategoryCode.STANDARD_RATE,
       vatRatePercent: 19,
     },
   ],
@@ -173,7 +173,7 @@ const { xml } = toXRechnung({
     duePayableAmount: 1190,
     currency: "EUR",
   },
-  vatBreakdown: [{ categoryCode: "S", ratePercent: 19, taxableAmount: 1000, taxAmount: 190 }],
+  vatBreakdown: [{ categoryCode: VatCategoryCode.STANDARD_RATE, ratePercent: 19, taxableAmount: 1000, taxAmount: 190 }],
 });
 
 // Upload `xml` to ZRE / OZG-RE / PEPPOL

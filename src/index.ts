@@ -31,7 +31,7 @@
 
 // ── Input types ──────────────────────────────────────────────────────────
 
-export { DocumentTypeCode, UnitCode } from "./types/input";
+export { DocumentTypeCode, UnitCode, VatCategoryCode } from "./types/input";
 
 export type {
   FacturXInvoiceInput,

@@ -4,7 +4,7 @@
  * @module tests/helpers
  */
 
-import { DocumentTypeCode, UnitCode } from "../src/types/input";
+import { DocumentTypeCode, UnitCode, VatCategoryCode } from "../src/types/input";
 import type { FacturXInvoiceInput } from "../src/types/input";
 
 /**
@@ -76,7 +76,7 @@ export function createBasicWlInput(overrides?: Partial<FacturXInvoiceInput>): Fa
     },
     vatBreakdown: [
       {
-        categoryCode: "S",
+        categoryCode: VatCategoryCode.STANDARD_RATE,
         ratePercent: 19,
         taxableAmount: 1000,
         taxAmount: 190,
@@ -135,7 +135,7 @@ export function createEn16931Input(overrides?: Partial<FacturXInvoiceInput>): Fa
         quantity: 10,
         unitCode: UnitCode.HOUR,
         unitPrice: 150,
-        vatCategoryCode: "S",
+        vatCategoryCode: VatCategoryCode.STANDARD_RATE,
         vatRatePercent: 19,
       },
       {
@@ -144,7 +144,7 @@ export function createEn16931Input(overrides?: Partial<FacturXInvoiceInput>): Fa
         quantity: 1,
         unitCode: UnitCode.UNIT,
         unitPrice: 500,
-        vatCategoryCode: "S",
+        vatCategoryCode: VatCategoryCode.STANDARD_RATE,
         vatRatePercent: 19,
       },
     ],
@@ -158,7 +158,7 @@ export function createEn16931Input(overrides?: Partial<FacturXInvoiceInput>): Fa
     },
     vatBreakdown: [
       {
-        categoryCode: "S",
+        categoryCode: VatCategoryCode.STANDARD_RATE,
         ratePercent: 19,
         taxableAmount: 2000,
         taxAmount: 380,
@@ -215,7 +215,7 @@ export function createBasicInput(overrides?: Partial<FacturXInvoiceInput>): Fact
         quantity: 5,
         unitCode: UnitCode.UNIT,
         unitPrice: 20,
-        vatCategoryCode: "S",
+        vatCategoryCode: VatCategoryCode.STANDARD_RATE,
         vatRatePercent: 19,
       },
     ],
@@ -229,7 +229,7 @@ export function createBasicInput(overrides?: Partial<FacturXInvoiceInput>): Fact
     },
     vatBreakdown: [
       {
-        categoryCode: "S",
+        categoryCode: VatCategoryCode.STANDARD_RATE,
         ratePercent: 19,
         taxableAmount: 100,
         taxAmount: 19,
@@ -298,7 +298,7 @@ export function createExtendedInput(overrides?: Partial<FacturXInvoiceInput>): F
         unitCode: UnitCode.DAY,
         unitPrice: 800,
         grossUnitPrice: 900,
-        vatCategoryCode: "S",
+        vatCategoryCode: VatCategoryCode.STANDARD_RATE,
         vatRatePercent: 19,
         originCountry: "DE",
       },
@@ -308,7 +308,7 @@ export function createExtendedInput(overrides?: Partial<FacturXInvoiceInput>): F
         quantity: 1,
         unitCode: UnitCode.UNIT,
         unitPrice: 2500,
-        vatCategoryCode: "S",
+        vatCategoryCode: VatCategoryCode.STANDARD_RATE,
         vatRatePercent: 19,
       },
     ],
@@ -322,7 +322,7 @@ export function createExtendedInput(overrides?: Partial<FacturXInvoiceInput>): F
     },
     vatBreakdown: [
       {
-        categoryCode: "S",
+        categoryCode: VatCategoryCode.STANDARD_RATE,
         ratePercent: 19,
         taxableAmount: 4900,
         taxAmount: 931,

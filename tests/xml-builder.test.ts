@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { buildXml, escapeXml } from "../src/core/xml-builder";
 import { Profile, Flavor } from "../src/flavors/constants";
-import { DocumentTypeCode, UnitCode } from "../src/types/input";
+import { DocumentTypeCode, UnitCode, VatCategoryCode } from "../src/types/input";
 import {
   createMinimumInput,
   createBasicWlInput,
@@ -305,7 +305,7 @@ describe("Edge cases", () => {
           name: "Item A",
           quantity: 2,
           unitPrice: 50,
-          vatCategoryCode: "S",
+          vatCategoryCode: VatCategoryCode.STANDARD_RATE,
           vatRatePercent: 19,
         },
         {
@@ -313,7 +313,7 @@ describe("Edge cases", () => {
           name: "Item B",
           quantity: 3,
           unitPrice: 100,
-          vatCategoryCode: "S",
+          vatCategoryCode: VatCategoryCode.STANDARD_RATE,
           vatRatePercent: 19,
         },
         {
@@ -321,7 +321,7 @@ describe("Edge cases", () => {
           name: "Item C",
           quantity: 1,
           unitPrice: 200,
-          vatCategoryCode: "S",
+          vatCategoryCode: VatCategoryCode.STANDARD_RATE,
           vatRatePercent: 19,
         },
       ],
@@ -745,7 +745,7 @@ describe("Untested XML elements", () => {
           baseAmount: 1000,
           reason: "Volume discount",
           reasonCode: "95",
-          vatCategoryCode: "S",
+          vatCategoryCode: VatCategoryCode.STANDARD_RATE,
           vatRatePercent: 19,
         },
       ],
@@ -767,7 +767,7 @@ describe("Untested XML elements", () => {
           quantity: 8,
           unitCode: UnitCode.HOUR,
           unitPrice: 120,
-          vatCategoryCode: "S",
+          vatCategoryCode: VatCategoryCode.STANDARD_RATE,
           vatRatePercent: 19,
         },
       ],
@@ -784,7 +784,7 @@ describe("Untested XML elements", () => {
           name: "Auto calc",
           quantity: 3,
           unitPrice: 100,
-          vatCategoryCode: "S",
+          vatCategoryCode: VatCategoryCode.STANDARD_RATE,
           vatRatePercent: 19,
         },
       ],
@@ -802,7 +802,7 @@ describe("Untested XML elements", () => {
           quantity: 3,
           unitPrice: 100,
           lineTotal: 280,
-          vatCategoryCode: "S",
+          vatCategoryCode: VatCategoryCode.STANDARD_RATE,
           vatRatePercent: 19,
         },
       ],

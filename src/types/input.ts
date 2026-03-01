@@ -171,6 +171,55 @@ export enum DocumentTypeCode {
 }
 
 // ---------------------------------------------------------------------------
+// VAT category codes
+// ---------------------------------------------------------------------------
+
+/**
+ * VAT category codes per UNTDID 5305 — Duty/tax/fee category code.
+ *
+ * Used on invoice line items (BT-151), allowances/charges, and
+ * VAT breakdown entries (BT-118) to classify the VAT treatment.
+ *
+ * | Code | Meaning                                              |
+ * |------|------------------------------------------------------|
+ * | S    | Standard rate                                        |
+ * | Z    | Zero rated goods                                     |
+ * | E    | Exempt from tax                                      |
+ * | AE   | VAT Reverse Charge                                   |
+ * | K    | Intra-community supply (goods & services)            |
+ * | G    | Free export, tax not charged                         |
+ * | O    | Services outside scope of tax                        |
+ * | L    | Canary Islands general indirect tax (IGIC)           |
+ * | M    | Ceuta and Melilla tax (IPSI)                         |
+ *
+ * Any valid UNTDID 5305 string is accepted — use this enum for
+ * readability and autocompletion.
+ *
+ * @see EN 16931 BT-151, BT-118
+ * @see UNTDID 5305
+ */
+export enum VatCategoryCode {
+  /** Standard rate */
+  STANDARD_RATE = "S",
+  /** Zero rated goods */
+  ZERO_RATED = "Z",
+  /** Exempt from tax */
+  EXEMPT = "E",
+  /** VAT Reverse Charge */
+  REVERSE_CHARGE = "AE",
+  /** Intra-community supply of goods and services */
+  INTRA_COMMUNITY_SUPPLY = "K",
+  /** Free export item, tax not charged */
+  FREE_EXPORT = "G",
+  /** Services outside scope of tax */
+  OUTSIDE_SCOPE = "O",
+  /** Canary Islands general indirect tax (IGIC) */
+  CANARY_ISLANDS_TAX = "L",
+  /** Tax for production, services and importation in Ceuta and Melilla (IPSI) */
+  CEUTA_MELILLA_TAX = "M",
+}
+
+// ---------------------------------------------------------------------------
 // Unit of measure codes
 // ---------------------------------------------------------------------------
 
@@ -659,7 +708,7 @@ export interface InvoiceLineInput {
    * VAT category code (e.g. `"S"`, `"Z"`, `"E"`, `"G"`).
    * @see EN 16931 BT-151
    */
-  vatCategoryCode?: string;
+  vatCategoryCode?: VatCategoryCode | (string & Record<never, never>);
 
   /**
    * VAT rate in percent (e.g. `19`, `7`, `0`).
@@ -756,7 +805,7 @@ export interface AllowanceChargeInput {
   percent?: number;
 
   /** VAT category code for this allowance/charge */
-  vatCategoryCode?: string;
+  vatCategoryCode?: VatCategoryCode | (string & Record<never, never>);
 
   /** VAT rate for this allowance/charge */
   vatRatePercent?: number;
@@ -964,7 +1013,7 @@ export interface VatBreakdownInput {
    * `"G"` = free export, `"K"` = intra-community, `"AE"` = reverse charge, etc.).
    * @see EN 16931 BT-118
    */
-  categoryCode: string;
+  categoryCode: VatCategoryCode | (string & Record<never, never>);
 
   /**
    * VAT rate in percent.
