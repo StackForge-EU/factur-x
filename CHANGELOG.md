@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Release workflow: upgrade npm via `corepack prepare npm@latest --activate` instead of `npm install -g npm@latest`, which crashed on the GitHub-hosted Node 22.22.2 toolcache where the bundled npm was missing its own `promise-retry` transitive dependency
+- `src/core/embed.ts`: import `console` from `node:console` so the new PDF/A-3 warnings type-check under the project's `lib: ["ES2022"]` tsconfig (no DOM lib)
+
 ## [1.0.2] — 2026-05-05
 
 ### Added
