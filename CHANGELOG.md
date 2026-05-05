@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.3] — 2026-05-05
+
 ### Fixed
 
 - Release workflow: upgrade npm via `corepack prepare npm@latest --activate` instead of `npm install -g npm@latest`, which crashed on the GitHub-hosted Node 22.22.2 toolcache where the bundled npm was missing its own `promise-retry` transitive dependency
@@ -59,5 +61,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.0.3]: https://github.com/StackForge-EU/factur-x/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/StackForge-EU/factur-x/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/StackForge-EU/factur-x/compare/v1.0.0...v1.0.1
