@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.4] — 2026-05-05
+
 ### Fixed
 
 - Release workflow `publish-npm` job: bump `node-version` to `24.15.0` (current Node LTS) and roll back the npm upgrade step from `corepack prepare npm@latest --activate` to `npm install -g npm@latest`. The corepack route in v1.0.3 silently broke OIDC trusted publishing against the npm registry (sigstore provenance signing still worked, but the registry `PUT` went out unauthenticated and was rejected with a 404), so v1.0.2 and v1.0.3 never reached `registry.npmjs.org` — `dist-tags.latest` there is still `1.0.1`.
@@ -65,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.0.4]: https://github.com/StackForge-EU/factur-x/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/StackForge-EU/factur-x/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/StackForge-EU/factur-x/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/StackForge-EU/factur-x/compare/v1.0.0...v1.0.1
