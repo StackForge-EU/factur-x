@@ -94,14 +94,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24.15.0
           cache: npm
           registry-url: https://registry.npmjs.org
 
       - name: Upgrade npm (OIDC trusted publishing requires >=11.5.1)
-        run: |
-          corepack enable
-          corepack prepare npm@latest --activate
+        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: npm ci

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Release workflow `publish-npm` job: bump `node-version` to `24.15.0` (current Node LTS) and roll back the npm upgrade step from `corepack prepare npm@latest --activate` to `npm install -g npm@latest`. The corepack route in v1.0.3 silently broke OIDC trusted publishing against the npm registry (sigstore provenance signing still worked, but the registry `PUT` went out unauthenticated and was rejected with a 404), so v1.0.2 and v1.0.3 never reached `registry.npmjs.org` — `dist-tags.latest` there is still `1.0.1`.
+
 ## [1.0.3] — 2026-05-05
 
 ### Fixed
