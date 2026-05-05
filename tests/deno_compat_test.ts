@@ -122,7 +122,7 @@ Deno.test("buildXml BASIC_WL: VAT breakdown and payment means", () => {
 
 Deno.test("buildXml BASIC: line items and VAT breakdown", () => {
   const xml = buildXml(createBasicInput(), Profile.BASIC);
-  assertStringIncludes(xml, "urn:factur-x.eu:1p0:basic");
+  assertStringIncludes(xml, "urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic");
   assertStringIncludes(xml, "IncludedSupplyChainTradeLineItem");
   assertStringIncludes(xml, "<ram:LineID>1</ram:LineID>");
   assertStringIncludes(xml, "Widget A");
@@ -135,7 +135,7 @@ Deno.test("buildXml BASIC: line items and VAT breakdown", () => {
 
 Deno.test("buildXml EN16931: full line items, contacts, delivery", () => {
   const xml = buildXml(createEn16931Input(), Profile.EN16931);
-  assertStringIncludes(xml, "urn:factur-x.eu:1p0:en16931");
+  assertStringIncludes(xml, "<ram:ID>urn:cen.eu:en16931:2017</ram:ID>");
   assertStringIncludes(xml, "<ram:LineID>1</ram:LineID>");
   assertStringIncludes(xml, "<ram:LineID>2</ram:LineID>");
   assertStringIncludes(xml, "Consulting Services");
@@ -151,7 +151,7 @@ Deno.test("buildXml EN16931: full line items, contacts, delivery", () => {
 
 Deno.test("buildXml EXTENDED: name, language, legal org, delivery party", () => {
   const xml = buildXml(createExtendedInput(), Profile.EXTENDED);
-  assertStringIncludes(xml, "urn:factur-x.eu:1p0:extended");
+  assertStringIncludes(xml, "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended");
   assertStringIncludes(xml, "<ram:Name>Extended Test Invoice</ram:Name>");
   assertStringIncludes(xml, "<ram:LanguageID>de</ram:LanguageID>");
   assertStringIncludes(xml, "SpecifiedLegalOrganization");
@@ -283,7 +283,7 @@ Deno.test(
 // Flavor constants & registry
 // ---------------------------------------------------------------------------
 
-Deno.test("PROFILE_URNS: all 5 profiles have URNs containing factur-x.eu", () => {
+Deno.test("PROFILE_URNS: each profile maps to a non-empty URN", () => {
   const profiles = [
     Profile.MINIMUM,
     Profile.BASIC_WL,
@@ -292,8 +292,12 @@ Deno.test("PROFILE_URNS: all 5 profiles have URNs containing factur-x.eu", () =>
     Profile.EXTENDED,
   ];
   for (const p of profiles) {
-    assertStringIncludes(PROFILE_URNS[p], "factur-x.eu");
+    assertGreater(PROFILE_URNS[p].length, 0);
   }
+  // Sanity: BASIC and EXTENDED are EN 16931 CIUS / extension URNs.
+  assertStringIncludes(PROFILE_URNS[Profile.BASIC], "urn:cen.eu:en16931:2017#compliant#");
+  assertStringIncludes(PROFILE_URNS[Profile.EXTENDED], "urn:cen.eu:en16931:2017#conformant#");
+  assertEquals(PROFILE_URNS[Profile.EN16931], "urn:cen.eu:en16931:2017");
 });
 
 Deno.test("PROFILE_SCHEMA_DIRS: all profiles have directory names", () => {
@@ -357,7 +361,10 @@ Deno.test("toXRechnung: generates valid CII XML with PEPPOL URN", () => {
   const result = toXRechnung(createXRechnungInput());
   assertStringIncludes(result.xml, "<?xml");
   assertStringIncludes(result.xml, "CrossIndustryInvoice");
-  assertStringIncludes(result.xml, "urn:factur-x.eu:1p0:en16931");
+  assertStringIncludes(
+    result.xml,
+    "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
+  );
   assertStringIncludes(result.xml, "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0");
   assertStringIncludes(result.xml, "04011000-12345-67");
 });

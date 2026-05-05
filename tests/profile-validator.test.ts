@@ -1,11 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { validateInput } from "../src/validation/profile-validator";
-import { Profile } from "../src/flavors/constants";
+import { Profile, Flavor } from "../src/flavors/constants";
 import {
   createMinimumInput,
   createBasicWlInput,
+  createBasicInput,
   createEn16931Input,
   createExtendedInput,
+  createXRechnungInput,
 } from "./helpers";
 
 describe("MINIMUM profile validation", () => {
@@ -580,5 +582,221 @@ describe("Multiple errors", () => {
     const en16931Error = result.errors.find((e) => e.field === "lines[0].vatCategoryCode");
     expect(en16931Error).toBeDefined();
     expect(en16931Error!.profile).toBe(Profile.EN16931);
+  });
+});
+
+describe("BR-27 negative line price", () => {
+  it("rejects a line with negative unitPrice for BASIC", () => {
+    const base = createBasicInput();
+    const input = createBasicInput({
+      lines: [{ ...base.lines![0], unitPrice: -10 }],
+    });
+    const result = validateInput(input, Profile.BASIC);
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((e) => e.field)).toContain("lines[0].unitPrice");
+  });
+
+  it("accepts zero unitPrice", () => {
+    const base = createBasicInput();
+    const input = createBasicInput({
+      lines: [{ ...base.lines![0], unitPrice: 0 }],
+      totals: { ...base.totals!, lineTotal: 0, taxBasisTotal: 0, taxTotal: 0, grandTotal: 0, duePayableAmount: 0 },
+      vatBreakdown: [{ ...base.vatBreakdown![0], taxableAmount: 0, taxAmount: 0 }],
+    });
+    const result = validateInput(input, Profile.BASIC);
+    const negPriceErrors = result.errors.filter((e) => e.field.endsWith(".unitPrice"));
+    expect(negPriceErrors).toHaveLength(0);
+  });
+});
+
+describe("BR-CO-15 totals consistency", () => {
+  it("rejects grandTotal that does not equal taxBasisTotal + taxTotal", () => {
+    const input = createBasicInput({
+      totals: {
+        ...createBasicInput().totals!,
+        taxBasisTotal: 100,
+        taxTotal: 19,
+        grandTotal: 100, // wrong: missing VAT
+        duePayableAmount: 100,
+      },
+    });
+    const result = validateInput(input, Profile.BASIC);
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((e) => e.field)).toContain("totals.grandTotal");
+  });
+
+  it("accepts grandTotal that matches", () => {
+    const input = createBasicInput();
+    const result = validateInput(input, Profile.BASIC);
+    const totalErrors = result.errors.filter((e) => e.field === "totals.grandTotal");
+    expect(totalErrors).toHaveLength(0);
+  });
+});
+
+describe("BR-CO-10 sum of line nets equals lineTotal", () => {
+  it("rejects when totals.lineTotal disagrees with Σ line.lineTotal", () => {
+    const base = createBasicInput();
+    const input = createBasicInput({
+      lines: [{ ...base.lines![0], unitPrice: 20, quantity: 5, lineTotal: 100 }],
+      totals: { ...base.totals!, lineTotal: 999 },
+    });
+    const result = validateInput(input, Profile.BASIC);
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((e) => e.field)).toContain("totals.lineTotal");
+  });
+});
+
+describe("BR-CO-13 taxBasisTotal composition", () => {
+  it("rejects when taxBasisTotal != lineTotal - allowance + charge", () => {
+    const input = createBasicInput({
+      totals: {
+        ...createBasicInput().totals!,
+        lineTotal: 100,
+        allowanceTotal: 10,
+        taxBasisTotal: 100, // wrong: should be 90
+        taxTotal: 17.1,
+        grandTotal: 107.1,
+        duePayableAmount: 107.1,
+      },
+      vatBreakdown: [{ categoryCode: "S", ratePercent: 19, taxableAmount: 90, taxAmount: 17.1 }],
+    });
+    const result = validateInput(input, Profile.BASIC);
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((e) => e.field)).toContain("totals.taxBasisTotal");
+  });
+});
+
+describe("BR-CO-14 tax total = sum of vat breakdown amounts", () => {
+  it("rejects when totals.taxTotal disagrees with Σ vatBreakdown.taxAmount", () => {
+    const input = createBasicInput({
+      totals: { ...createBasicInput().totals!, taxTotal: 99 },
+    });
+    const result = validateInput(input, Profile.BASIC);
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((e) => e.field)).toContain("totals.taxTotal");
+  });
+});
+
+describe("BR-CO-17 vat amount = round(basis × rate / 100)", () => {
+  it("rejects a vatBreakdown where taxAmount != basis × rate / 100", () => {
+    const input = createBasicInput({
+      vatBreakdown: [
+        { categoryCode: "S", ratePercent: 19, taxableAmount: 100, taxAmount: 0 }, // wrong: should be 19
+      ],
+      totals: { ...createBasicInput().totals!, taxTotal: 0, grandTotal: 100, duePayableAmount: 100 },
+    });
+    const result = validateInput(input, Profile.BASIC);
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((e) => e.field)).toContain("vatBreakdown[0].taxAmount");
+  });
+});
+
+describe("BR-FX-EN-04 delivery date / billing period", () => {
+  it("rejects BASIC invoice with no delivery date and no billing period", () => {
+    const input = createBasicInput();
+    delete input.delivery;
+    delete input.billingPeriod;
+    const result = validateInput(input, Profile.BASIC);
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((e) => e.field)).toContain("delivery.date");
+  });
+
+  it("accepts BASIC invoice with billingPeriod set", () => {
+    const input = createBasicInput();
+    delete input.delivery;
+    input.billingPeriod = { startDate: "2025-06-01", endDate: "2025-06-30" };
+    const result = validateInput(input, Profile.BASIC);
+    const deliveryErrors = result.errors.filter((e) => e.field === "delivery.date");
+    expect(deliveryErrors).toHaveLength(0);
+  });
+
+  it("does not require delivery date for prepayment invoices (type 386)", () => {
+    const input = createBasicInput({
+      document: { ...createBasicInput().document!, typeCode: "386" as any },
+    });
+    delete input.delivery;
+    delete input.billingPeriod;
+    const result = validateInput(input, Profile.BASIC);
+    const deliveryErrors = result.errors.filter((e) => e.field === "delivery.date");
+    expect(deliveryErrors).toHaveLength(0);
+  });
+});
+
+describe("XRechnung BR-DE / PEPPOL rules", () => {
+  it("a fully populated XRechnung input passes", () => {
+    const input = createXRechnungInput();
+    input.document.businessProcessId = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0";
+    const result = validateInput(input, Profile.EN16931, Flavor.XRECHNUNG);
+    expect(result.valid).toBe(true);
+  });
+
+  it("BR-DE-15: rejects when buyerReference is missing", () => {
+    const input = createXRechnungInput();
+    input.document.businessProcessId = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0";
+    delete input.document.buyerReference;
+    const result = validateInput(input, Profile.EN16931, Flavor.XRECHNUNG);
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((e) => e.field)).toContain("document.buyerReference");
+  });
+
+  it("BR-DE-2: rejects when seller contact is missing", () => {
+    const input = createXRechnungInput();
+    input.document.businessProcessId = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0";
+    input.seller!.contact = undefined;
+    const result = validateInput(input, Profile.EN16931, Flavor.XRECHNUNG);
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((e) => e.field)).toContain("seller.contact");
+  });
+
+  it("PEPPOL-EN16931-R020: rejects when seller electronic address is missing", () => {
+    const input = createXRechnungInput();
+    input.document.businessProcessId = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0";
+    input.seller!.electronicAddress = undefined;
+    const result = validateInput(input, Profile.EN16931, Flavor.XRECHNUNG);
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((e) => e.field)).toContain("seller.electronicAddress");
+  });
+
+  it("PEPPOL-EN16931-R010: rejects when buyer electronic address is missing", () => {
+    const input = createXRechnungInput();
+    input.document.businessProcessId = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0";
+    input.buyer!.electronicAddress = undefined;
+    const result = validateInput(input, Profile.EN16931, Flavor.XRECHNUNG);
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((e) => e.field)).toContain("buyer.electronicAddress");
+  });
+
+  it("BR-62: rejects seller electronic address without schemeID (Factur-X BASIC)", () => {
+    const input = createBasicInput();
+    input.seller!.electronicAddress = { value: "info@stack-forge.eu", schemeID: "" };
+    const result = validateInput(input, Profile.BASIC);
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((e) => e.field)).toContain("seller.electronicAddress.schemeID");
+  });
+
+  it("BR-DE-19: rejects an invalid IBAN when meansCode is 58", () => {
+    const input = createXRechnungInput();
+    input.document.businessProcessId = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0";
+    input.payment = { meansCode: "58", iban: "DE00000000000000000000" };
+    const result = validateInput(input, Profile.EN16931, Flavor.XRECHNUNG);
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((e) => e.field)).toContain("payment.iban");
+  });
+
+  it("BR-DE-19: accepts a valid IBAN when meansCode is 58", () => {
+    const input = createXRechnungInput();
+    input.document.businessProcessId = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0";
+    input.payment = { meansCode: "58", iban: "DE89 3704 0044 0532 0130 00" };
+    const result = validateInput(input, Profile.EN16931, Flavor.XRECHNUNG);
+    const ibanErrors = result.errors.filter((e) => e.field === "payment.iban");
+    expect(ibanErrors).toHaveLength(0);
+  });
+
+  it("XRechnung rules do not apply to non-XRechnung flavors", () => {
+    const input = createBasicInput();
+    delete input.document.buyerReference;
+    const result = validateInput(input, Profile.BASIC); // no flavor
+    const buyerRefErrors = result.errors.filter((e) => e.field === "document.buyerReference");
+    expect(buyerRefErrors).toHaveLength(0);
   });
 });

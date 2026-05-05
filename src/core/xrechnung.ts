@@ -81,17 +81,6 @@ export function toXRechnung(
 
   validateFlavorProfile(Flavor.XRECHNUNG, profile);
 
-  let validation: ValidationResult | undefined;
-  if (validate) {
-    validation = validateInput(input, profile);
-    if (!validation.valid) {
-      throw new Error(
-        `Input validation failed for XRechnung (profile "${profile}"):\n` +
-          validation.errors.map((e) => `  - ${e.field}: ${e.message}`).join("\n"),
-      );
-    }
-  }
-
   const enrichedInput: FacturXInvoiceInput = {
     ...input,
     document: {
@@ -99,6 +88,17 @@ export function toXRechnung(
       businessProcessId: resolveBusinessProcessUrn(input, Flavor.XRECHNUNG),
     },
   };
+
+  let validation: ValidationResult | undefined;
+  if (validate) {
+    validation = validateInput(enrichedInput, profile, Flavor.XRECHNUNG);
+    if (!validation.valid) {
+      throw new Error(
+        `Input validation failed for XRechnung (profile "${profile}"):\n` +
+          validation.errors.map((e) => `  - ${e.field}: ${e.message}`).join("\n"),
+      );
+    }
+  }
 
   const xml = buildXml(enrichedInput, profile, Flavor.XRECHNUNG);
 

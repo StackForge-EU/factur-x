@@ -1,4 +1,4 @@
-import { UnitCode } from "../types/input";
+import { UnitCode, DocumentTypeCode } from "../types/input";
 import type {
   FacturXInvoiceInput,
   TradePartyInput,
@@ -10,7 +10,7 @@ import type {
   InvoiceTotalsInput,
 } from "../types/input";
 
-import { Profile, Flavor, PROFILE_URNS } from "../flavors/constants";
+import { Profile, Flavor, PROFILE_URNS, XRECHNUNG_PROFILE_URN } from "../flavors/constants";
 
 import { resolveTypeCode } from "../flavors/registry";
 
@@ -132,7 +132,12 @@ function buildParty(p: TradePartyInput, profile: Profile): string {
   if (p.address && atLeast(profile, Profile.BASIC_WL)) x += buildAddress(p.address);
 
   if (p.electronicAddress)
-    x += tag("ram:URIUniversalCommunication", tag("ram:URIID", escapeXml(p.electronicAddress)));
+    x += tag(
+      "ram:URIUniversalCommunication",
+      tag("ram:URIID", escapeXml(p.electronicAddress.value), {
+        schemeID: p.electronicAddress.schemeID,
+      }),
+    );
 
   if (p.taxRegistrations) {
     for (const tr of p.taxRegistrations) {
@@ -189,7 +194,8 @@ function buildLineItem(line: InvoiceLineInput, profile: Profile): string {
       tx += tag("ram:RateApplicablePercent", line.vatRatePercent.toString());
     settle += tag("ram:ApplicableTradeTax", tx);
   }
-  const lineTotal = line.lineTotal ?? line.quantity * line.unitPrice;
+  // Round the fallback to currency precision so 0.1 × 3 ≠ 0.30000000000000004.
+  const lineTotal = line.lineTotal ?? Math.round(line.quantity * line.unitPrice * 100) / 100;
   settle += tag(
     "ram:SpecifiedTradeSettlementLineMonetarySummation",
     tag("ram:LineTotalAmount", fmtAmt(lineTotal)),
@@ -319,9 +325,13 @@ export function buildXml(input: FacturXInvoiceInput, profile: Profile, flavor?: 
       "ram:BusinessProcessSpecifiedDocumentContextParameter",
       tag("ram:ID", escapeXml(doc.businessProcessId)),
     );
+  // BR-DE-21: when emitting XRechnung the profile URN is the XRechnung CIUS,
+  // not the underlying EN 16931 URN. For all other flavors keep the
+  // profile-specific URN from the codedb.
+  const profileUrn = fl === Flavor.XRECHNUNG ? XRECHNUNG_PROFILE_URN : PROFILE_URNS[profile];
   ctx += tag(
     "ram:GuidelineSpecifiedDocumentContextParameter",
-    tag("ram:ID", PROFILE_URNS[profile]),
+    tag("ram:ID", profileUrn),
   );
 
   // ── ExchangedDocument ────────────────────────────────────────────────
@@ -391,6 +401,7 @@ export function buildXml(input: FacturXInvoiceInput, profile: Profile, flavor?: 
 
   // ── ApplicableHeaderTradeDelivery ────────────────────────────────────
   let del = "";
+  let hasActualDelivery = false;
   if (input.delivery && atLeast(profile, Profile.BASIC_WL)) {
     if (input.delivery.partyName || input.delivery.location) {
       let sp = "";
@@ -398,11 +409,13 @@ export function buildXml(input: FacturXInvoiceInput, profile: Profile, flavor?: 
       if (input.delivery.location) sp += buildAddress(input.delivery.location);
       del += tag("ram:ShipToTradeParty", sp);
     }
-    if (input.delivery.date)
+    if (input.delivery.date) {
       del += tag(
         "ram:ActualDeliverySupplyChainEvent",
         dateEl("ram:OccurrenceDateTime", input.delivery.date),
       );
+      hasActualDelivery = true;
+    }
     if (input.delivery.despatchAdviceReference)
       del += tag(
         "ram:DespatchAdviceReferencedDocument",
@@ -418,6 +431,24 @@ export function buildXml(input: FacturXInvoiceInput, profile: Profile, flavor?: 
         del += tag("ram:DespatchAdviceReferencedDocument", inner);
       }
     }
+  }
+
+  // BR-FX-EN-04 / PEPPOL-EN16931-R008: the schematron has two conjuncts —
+  // (a) a delivery date OR billing period must exist somewhere, AND
+  // (b) ApplicableHeaderTradeDelivery itself must contain ActualDeliveryEvent
+  //     OR have non-whitespace text content.
+  // BillingSpecifiedPeriod sits under Settlement, so it satisfies (a) but not
+  // (b). Always fall back to ActualDeliverySupplyChainEvent from doc.issueDate
+  // so the delivery element is non-empty for non-down-payment invoices.
+  if (
+    atLeast(profile, Profile.BASIC) &&
+    !hasActualDelivery &&
+    typeCode !== DocumentTypeCode.PREPAYMENT_INVOICE
+  ) {
+    del += tag(
+      "ram:ActualDeliverySupplyChainEvent",
+      dateEl("ram:OccurrenceDateTime", doc.issueDate),
+    );
   }
 
   tx += tag("ram:ApplicableHeaderTradeDelivery", del);

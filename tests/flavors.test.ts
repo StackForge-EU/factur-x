@@ -34,10 +34,22 @@ describe("PROFILE_URNS", () => {
     }
   });
 
-  it("each URN contains factur-x.eu", () => {
-    for (const profile of PROFILES) {
-      expect(PROFILE_URNS[profile]).toContain("factur-x.eu");
-    }
+  it("BASIC and EXTENDED carry the EN 16931 conformance prefix", () => {
+    expect(PROFILE_URNS[Profile.BASIC]).toBe(
+      "urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic",
+    );
+    expect(PROFILE_URNS[Profile.EXTENDED]).toBe(
+      "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
+    );
+  });
+
+  it("EN16931 is the bare CEN URN", () => {
+    expect(PROFILE_URNS[Profile.EN16931]).toBe("urn:cen.eu:en16931:2017");
+  });
+
+  it("MINIMUM and BASIC_WL keep the short factur-x URN", () => {
+    expect(PROFILE_URNS[Profile.MINIMUM]).toBe("urn:factur-x.eu:1p0:minimum");
+    expect(PROFILE_URNS[Profile.BASIC_WL]).toBe("urn:factur-x.eu:1p0:basicwl");
   });
 });
 

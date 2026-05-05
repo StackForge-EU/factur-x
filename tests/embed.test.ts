@@ -79,7 +79,7 @@ describe("embedFacturX", () => {
       profile: Profile.EN16931,
     });
 
-    expect(result.xml).toContain("urn:factur-x.eu:1p0:en16931");
+    expect(result.xml).toContain("urn:cen.eu:en16931:2017");
   });
 
   it("validates input by default (validateBeforeEmbed=true)", async () => {
@@ -367,5 +367,99 @@ describe("Embed with all profiles", () => {
     expect(result.validation).toBeDefined();
     expect(result.validation!.valid).toBe(true);
     expect(result.validation!.errors).toHaveLength(0);
+  });
+});
+
+describe("PDF/A-3 OutputIntent injection", () => {
+  // A non-functional placeholder profile blob — pdf-lib only embeds the bytes,
+  // it never parses them, so this is enough to exercise the injection path.
+  const dummyIcc = new Uint8Array([
+    0x00, 0x00, 0x0c, 0x48, 0x4c, 0x69, 0x6e, 0x6f, 0x02, 0x10, 0x00, 0x00,
+  ]);
+
+  it("adds an /OutputIntents entry when one is missing and an ICC profile is provided", async () => {
+    const pdf = await createTestPdf();
+    const result = await embedFacturX({
+      pdf,
+      input: createEn16931Input(),
+      profile: Profile.EN16931,
+      rgbIccProfile: dummyIcc,
+    });
+
+    const out = await PDFDocument.load(result.pdf);
+    const intents = out.catalog.lookup(PDFName.of("OutputIntents"));
+    expect(intents).toBeInstanceOf(PDFArray);
+    const arr = intents as PDFArray;
+    expect(arr.size()).toBeGreaterThan(0);
+    const intent = arr.lookup(0) as PDFDict;
+    expect((intent.lookup(PDFName.of("S")) as PDFName).asString()).toBe("/GTS_PDFA1");
+    expect(intent.has(PDFName.of("DestOutputProfile"))).toBe(true);
+  });
+
+  it("does not overwrite an existing /OutputIntents array", async () => {
+    // Build an input PDF that already has an OutputIntents entry.
+    const seedDoc = await PDFDocument.create();
+    seedDoc.addPage([595, 842]);
+    const seedIcc = seedDoc.context.flateStream(new Uint8Array([0x42]), { N: 3 });
+    const seedRef = seedDoc.context.register(seedIcc);
+    const intent = seedDoc.context.obj({
+      Type: "OutputIntent",
+      S: "GTS_PDFA1",
+      OutputConditionIdentifier: "preexisting",
+      DestOutputProfile: seedRef,
+    });
+    const intents = seedDoc.context.obj([intent]);
+    seedDoc.catalog.set(PDFName.of("OutputIntents"), intents);
+    const pdfBytes = await seedDoc.save();
+
+    const result = await embedFacturX({
+      pdf: pdfBytes,
+      input: createEn16931Input(),
+      profile: Profile.EN16931,
+      rgbIccProfile: dummyIcc,
+    });
+
+    const out = await PDFDocument.load(result.pdf);
+    const finalIntents = out.catalog.lookup(PDFName.of("OutputIntents")) as PDFArray;
+    expect(finalIntents.size()).toBe(1);
+    const finalIntent = finalIntents.lookup(0) as PDFDict;
+    const id = finalIntent.lookup(PDFName.of("OutputConditionIdentifier"));
+    // Original identifier preserved.
+    expect(id?.toString()).toContain("preexisting");
+  });
+
+  it("throws when unembeddedFonts=throw and the PDF references base-14 fonts", async () => {
+    const seedDoc = await PDFDocument.create();
+    const page = seedDoc.addPage([595, 842]);
+    const helvetica = await seedDoc.embedFont("Helvetica"); // standard 14, not embedded
+    page.drawText("Hello", { x: 50, y: 800, font: helvetica, size: 12 });
+    const pdfBytes = await seedDoc.save();
+
+    await expect(
+      embedFacturX({
+        pdf: pdfBytes,
+        input: createEn16931Input(),
+        profile: Profile.EN16931,
+        rgbIccProfile: dummyIcc,
+        unembeddedFonts: "throw",
+      }),
+    ).rejects.toThrow(/not embedded/i);
+  });
+
+  it("ignores font check when unembeddedFonts=ignore", async () => {
+    const seedDoc = await PDFDocument.create();
+    const page = seedDoc.addPage([595, 842]);
+    const helvetica = await seedDoc.embedFont("Helvetica");
+    page.drawText("Hello", { x: 50, y: 800, font: helvetica, size: 12 });
+    const pdfBytes = await seedDoc.save();
+
+    const result = await embedFacturX({
+      pdf: pdfBytes,
+      input: createEn16931Input(),
+      profile: Profile.EN16931,
+      rgbIccProfile: dummyIcc,
+      unembeddedFonts: "ignore",
+    });
+    expect(result.pdf).toBeInstanceOf(Uint8Array);
   });
 });

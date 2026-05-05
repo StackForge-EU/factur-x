@@ -116,7 +116,7 @@ export function createEn16931Input(overrides?: Partial<FacturXInvoiceInput>): Fa
         phone: "+49 8702 123456",
         email: "info@stack-forge.eu",
       },
-      electronicAddress: "info@stack-forge.eu",
+      electronicAddress: { value: "info@stack-forge.eu", schemeID: "EM" },
     },
     buyer: {
       name: "Kite-Engineer by Stefan Merthan",
@@ -240,6 +240,9 @@ export function createBasicInput(overrides?: Partial<FacturXInvoiceInput>): Fact
       iban: "DE89370400440532013000",
       dueDate: "2025-07-18",
     },
+    delivery: {
+      date: "2025-06-18",
+    },
     ...overrides,
   };
 }
@@ -273,7 +276,7 @@ export function createExtendedInput(overrides?: Partial<FacturXInvoiceInput>): F
         phone: "+49 8702 123456",
         email: "info@stack-forge.eu",
       },
-      electronicAddress: "info@stack-forge.eu",
+      electronicAddress: { value: "info@stack-forge.eu", schemeID: "EM" },
       legalOrganization: {
         id: "HRB 12345",
         tradingName: "StackForge",
@@ -355,13 +358,18 @@ export function createExtendedInput(overrides?: Partial<FacturXInvoiceInput>): F
 export function createXRechnungInput(
   overrides?: Partial<FacturXInvoiceInput>,
 ): FacturXInvoiceInput {
+  const base = createEn16931Input();
   return {
-    ...createEn16931Input(),
+    ...base,
     document: {
       id: "XR-TEST-001",
       issueDate: "2025-06-25",
       typeCode: DocumentTypeCode.COMMERCIAL_INVOICE,
       buyerReference: "04011000-12345-67",
+    },
+    buyer: {
+      ...base.buyer!,
+      electronicAddress: { value: "buyer@kite-engineer.de", schemeID: "EM" },
     },
     ...overrides,
   };

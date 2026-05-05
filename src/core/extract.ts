@@ -78,19 +78,26 @@ function resolve(doc: PDFDocument, obj: unknown): unknown {
  * in the extracted XML.
  */
 function detectProfile(xml: string): Profile | undefined {
-  const profileMap: Record<string, Profile> = {
-    "urn:factur-x.eu:1p0:minimum": Profile.MINIMUM,
-    "urn:factur-x.eu:1p0:basicwl": Profile.BASIC_WL,
-    "urn:factur-x.eu:1p0:basic": Profile.BASIC,
-    "urn:factur-x.eu:1p0:en16931": Profile.EN16931,
-    "urn:factur-x.eu:1p0:extended": Profile.EXTENDED,
-    "urn:cen.eu:en16931:2017": Profile.EN16931,
-    "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0": Profile.EN16931,
-    "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_2.3": Profile.EN16931,
-    "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_2.2": Profile.EN16931,
-  };
+  // Order matters: longer/more-specific URNs must be tested before the bare
+  // short forms, otherwise `urn:factur-x.eu:1p0:basic` would shadow
+  // `urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic`.
+  const profileMap: Array<[string, Profile]> = [
+    ["urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended", Profile.EXTENDED],
+    ["urn:cen.eu:en16931:2017#conformant#urn:zugferd.de:2p0:extended", Profile.EXTENDED],
+    ["urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic", Profile.BASIC],
+    ["urn:cen.eu:en16931:2017#compliant#urn:zugferd.de:2p0:basic", Profile.BASIC],
+    ["urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0", Profile.EN16931],
+    ["urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_2.3", Profile.EN16931],
+    ["urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_2.2", Profile.EN16931],
+    ["urn:cen.eu:en16931:2017", Profile.EN16931],
+    ["urn:factur-x.eu:1p0:minimum", Profile.MINIMUM],
+    ["urn:factur-x.eu:1p0:basicwl", Profile.BASIC_WL],
+    ["urn:factur-x.eu:1p0:basic", Profile.BASIC],
+    ["urn:factur-x.eu:1p0:en16931", Profile.EN16931],
+    ["urn:factur-x.eu:1p0:extended", Profile.EXTENDED],
+  ];
 
-  for (const [urn, profile] of Object.entries(profileMap)) {
+  for (const [urn, profile] of profileMap) {
     if (xml.includes(urn)) return profile;
   }
   return undefined;

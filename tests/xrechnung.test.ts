@@ -12,7 +12,9 @@ describe("toXRechnung", () => {
 
   it("uses EN16931 profile URN", () => {
     const result = toXRechnung(createXRechnungInput());
-    expect(result.xml).toContain("urn:factur-x.eu:1p0:en16931");
+    expect(result.xml).toContain(
+      "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
+    );
   });
 
   it("injects PEPPOL business process URN by default", () => {
@@ -41,7 +43,9 @@ describe("toXRechnung", () => {
 
   it("defaults to EN16931 profile", () => {
     const result = toXRechnung(createXRechnungInput());
-    expect(result.xml).toContain("urn:factur-x.eu:1p0:en16931");
+    expect(result.xml).toContain(
+      "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
+    );
   });
 
   it("returns validation result when validate=true (default)", () => {

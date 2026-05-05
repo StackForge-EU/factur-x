@@ -24,14 +24,28 @@ export enum Flavor {
   CHRONO_PRO = "chrono-pro",
 }
 
-/** Profile URNs (GuidelineSpecifiedDocumentContextParameter) */
+/**
+ * Profile URNs (GuidelineSpecifiedDocumentContextParameter / BT-24).
+ *
+ * BASIC, EN16931, and EXTENDED use the EN 16931 conformance prefix because
+ * those profiles are CIUS / extension claims against the European norm. The
+ * exact strings are the only values accepted by the schematron shipped under
+ * `schema/{basic,en16931,extended}/` (the codedb cl id="1" enumeration).
+ */
 export const PROFILE_URNS: Record<Profile, string> = {
   MINIMUM: "urn:factur-x.eu:1p0:minimum",
   BASIC_WL: "urn:factur-x.eu:1p0:basicwl",
-  BASIC: "urn:factur-x.eu:1p0:basic",
-  EN16931: "urn:factur-x.eu:1p0:en16931",
-  EXTENDED: "urn:factur-x.eu:1p0:extended",
+  BASIC: "urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic",
+  EN16931: "urn:cen.eu:en16931:2017",
+  EXTENDED: "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
 };
+
+/**
+ * XRechnung CIUS URN (BR-DE-21). Used as the profile URN when emitting
+ * XRechnung instead of pure Factur-X / ZUGFeRD.
+ */
+export const XRECHNUNG_PROFILE_URN =
+  "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0";
 
 import { DocumentTypeCode } from "../types/input";
 

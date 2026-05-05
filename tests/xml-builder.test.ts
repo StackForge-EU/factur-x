@@ -118,7 +118,7 @@ describe("EN16931 profile", () => {
   const xml = buildXml(input, Profile.EN16931);
 
   it("contains en16931 profile URN", () => {
-    expect(xml).toContain("urn:factur-x.eu:1p0:en16931");
+    expect(xml).toContain("<ram:ID>urn:cen.eu:en16931:2017</ram:ID>");
   });
 
   it("contains line items with IDs, names, quantities, prices", () => {
@@ -230,6 +230,41 @@ describe("BASIC profile", () => {
     const x = buildXml(inp, Profile.BASIC);
     expect(x).not.toContain("This should be ignored");
     expect(x).not.toContain("Hidden Contact");
+  });
+
+  it("never emits an empty <ram:ApplicableHeaderTradeDelivery/> (BR-FX-EN-04)", () => {
+    const inp = createBasicInput();
+    delete inp.delivery;
+    delete inp.billingPeriod;
+    const x = buildXml(inp, Profile.BASIC);
+    expect(x).not.toContain("<ram:ApplicableHeaderTradeDelivery/>");
+    expect(x).not.toContain("<ram:ApplicableHeaderTradeDelivery></ram:ApplicableHeaderTradeDelivery>");
+    expect(x).toMatch(
+      /<ram:ApplicableHeaderTradeDelivery>\s*<ram:ActualDeliverySupplyChainEvent>/,
+    );
+  });
+
+  it("falls back to ActualDeliveryEvent even when billingPeriod is set (BR-FX-EN-04 second conjunct)", () => {
+    const inp = createBasicInput();
+    delete inp.delivery;
+    inp.billingPeriod = { startDate: "2026-05-01", endDate: "2026-05-31" };
+    const x = buildXml(inp, Profile.BASIC);
+    // billingPeriod alone satisfies the first conjunct of BR-FX-EN-04 but the
+    // second requires ApplicableHeaderTradeDelivery to be non-empty.
+    expect(x).not.toContain("<ram:ApplicableHeaderTradeDelivery/>");
+    expect(x).toMatch(
+      /<ram:ApplicableHeaderTradeDelivery>\s*<ram:ActualDeliverySupplyChainEvent>/,
+    );
+    expect(x).toContain("<ram:BillingSpecifiedPeriod>");
+  });
+
+  it("emits URIID with @schemeID for electronicAddress (BR-62)", () => {
+    const inp = createBasicInput();
+    inp.seller!.electronicAddress = { value: "info@stack-forge.eu", schemeID: "EM" };
+    const x = buildXml(inp, Profile.BASIC);
+    expect(x).toMatch(
+      /<ram:URIUniversalCommunication><ram:URIID schemeID="EM">info@stack-forge\.eu<\/ram:URIID><\/ram:URIUniversalCommunication>/,
+    );
   });
 });
 

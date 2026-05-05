@@ -616,10 +616,22 @@ export interface TradePartyInput {
   contact?: ContactInput;
 
   /**
-   * Electronic address (e.g. email or URI for e-delivery).
+   * Electronic address (e.g. PEPPOL participant ID, email).
+   *
+   * `value` is the address itself (e.g. `"info@stack-forge.eu"`,
+   * `"0088:1234567890123"`).
+   * `schemeID` is the EAS code list value (e.g. `"EM"` for email,
+   * `"9930"` for German VAT, `"0088"` for GLN). Required by BR-62 /
+   * FX-SCH-A-000158 — a URIID without `@schemeID` is rejected by every
+   * conforming validator (Mustang, KoSIT, veraPDF).
+   *
    * @see EN 16931 BT-34 / BT-49
+   * @see https://docs.peppol.eu/poacc/billing/3.0/codelist/eas/
    */
-  electronicAddress?: string;
+  electronicAddress?: {
+    value: string;
+    schemeID: string;
+  };
 
   /**
    * Tax registrations (VAT ID, fiscal number).
