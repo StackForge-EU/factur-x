@@ -9,6 +9,7 @@
  */
 
 import type { Buffer } from "node:buffer";
+import console from "node:console";
 import {
   PDFDocument,
   PDFName,
