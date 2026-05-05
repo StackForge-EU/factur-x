@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.2] — 2026-05-05
+
 ### Added
 
 - `EmbedOptions.rgbIccProfile` and `EmbedOptions.outputIntentIdentifier`: inject a PDF/A-3 `/OutputIntents` entry referencing an sRGB ICC profile when the input PDF lacks one (ISO 19005-3 §6.2.4.3)
@@ -52,4 +54,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.0.2]: https://github.com/StackForge-EU/factur-x/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/StackForge-EU/factur-x/compare/v1.0.0...v1.0.1
