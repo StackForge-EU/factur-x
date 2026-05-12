@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.5] — 2026-05-12
+
 - **`ChargeIndicator`'s inner `Indicator` element was emitted in the wrong XML
   namespace.** The XSD requires `udt:Indicator` (UnqualifiedDataType:100) but
   the builder emitted `ram:Indicator` (ReusableAggregateBusinessInformationEntity:100).
@@ -78,6 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.0.5]: https://github.com/StackForge-EU/factur-x/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/StackForge-EU/factur-x/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/StackForge-EU/factur-x/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/StackForge-EU/factur-x/compare/v1.0.1...v1.0.2
