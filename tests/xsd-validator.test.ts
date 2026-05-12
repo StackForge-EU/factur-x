@@ -28,6 +28,35 @@ describe("validateXsd", () => {
     expect(result.errors).toHaveLength(0);
   });
 
+  it("validates BASIC_WL with document-level allowances + charges (udt:Indicator namespace)", async () => {
+    // Regression: the XSD requires `udt:Indicator` inside ChargeIndicator.
+    // Emitting `ram:Indicator` is silently accepted by some readers but
+    // rejected here, and silently zeroes out every schematron sum over
+    // allowances/charges downstream (BR-S-08, BR-CO-11, BR-CO-14).
+    const xml = buildXml(
+      createBasicWlInput({
+        allowancesCharges: [
+          { isCharge: false, amount: 50, reason: "Coupon", vatCategoryCode: "S", vatRatePercent: 19 },
+          { isCharge: true, amount: 10, reason: "Shipping", vatCategoryCode: "S", vatRatePercent: 19 },
+        ],
+        totals: {
+          lineTotal: 1000,
+          allowanceTotal: 50,
+          chargeTotal: 10,
+          taxBasisTotal: 960,
+          taxTotal: 182.4,
+          grandTotal: 1142.4,
+          duePayableAmount: 1142.4,
+          currency: "EUR",
+        },
+      }),
+      Profile.BASIC_WL,
+    );
+    const result = await validateXsd(xml, Profile.BASIC_WL, { schemaBasePath });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
   it("validates valid EN16931 XML", async () => {
     const xml = buildXml(createEn16931Input(), Profile.EN16931);
     const result = await validateXsd(xml, Profile.EN16931, { schemaBasePath });

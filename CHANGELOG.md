@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **`ChargeIndicator`'s inner `Indicator` element was emitted in the wrong XML
+  namespace.** The XSD requires `udt:Indicator` (UnqualifiedDataType:100) but
+  the builder emitted `ram:Indicator` (ReusableAggregateBusinessInformationEntity:100).
+  The XSD rejected every invoice carrying a `SpecifiedTradeAllowanceCharge`,
+  and the BASIC schematron's `udt:Indicator='true'/'false'` predicates silently
+  matched nothing — so every downstream sum over allowances/charges (BR-S-08,
+  BR-CO-11, BR-CO-14) computed zero on the allowance/charge side and tripped.
+  Affects every caller that uses `allowancesCharges`; previously masked because
+  the test suite only exercised allowance presence, never XSD round-trip with
+  one. Regression test added in `tests/xsd-validator.test.ts`.
+
 ## [1.0.4] — 2026-05-05
 
 ### Fixed

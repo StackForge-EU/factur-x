@@ -399,6 +399,12 @@ describe("Edge cases", () => {
     expect(xml).toContain("SpecifiedTradeAllowanceCharge");
     expect(xml).toContain("Early payment discount");
     expect(xml).toContain("Shipping fee");
+    // BR-S-08 / BR-CO-11: ChargeIndicator's inner Indicator must be in the udt
+    // namespace, not ram. With the wrong namespace XSD rejects the file and
+    // every schematron query on allowances/charges silently returns nothing.
+    expect(xml).toContain("<ram:ChargeIndicator><udt:Indicator>false</udt:Indicator></ram:ChargeIndicator>");
+    expect(xml).toContain("<ram:ChargeIndicator><udt:Indicator>true</udt:Indicator></ram:ChargeIndicator>");
+    expect(xml).not.toMatch(/<ram:ChargeIndicator>\s*<ram:Indicator>/);
   });
 
   it("includes document references for order and preceding invoice", () => {

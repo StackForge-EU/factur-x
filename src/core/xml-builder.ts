@@ -216,7 +216,12 @@ function buildLineItem(line: InvoiceLineInput, profile: Profile): string {
 // ---------------------------------------------------------------------------
 
 function buildAllowanceCharge(ac: AllowanceChargeInput): string {
-  let x = tag("ram:ChargeIndicator", tag("ram:Indicator", ac.isCharge ? "true" : "false"));
+  // BT-1001 / BT-92 / BT-99: ChargeIndicator's inner Indicator element lives in
+  // the UnqualifiedDataType (udt) namespace, not the ram namespace. The XSD
+  // rejects `<ram:Indicator>`, and the schematron's BR-S-08 / BR-CO-11 / BR-CO-14
+  // queries match on `udt:Indicator` literally — so emitting the wrong namespace
+  // silently zeroes out every allowance/charge sum in downstream rules.
+  let x = tag("ram:ChargeIndicator", tag("udt:Indicator", ac.isCharge ? "true" : "false"));
   if (ac.percent !== undefined) x += tag("ram:CalculationPercent", ac.percent.toString());
   if (ac.baseAmount !== undefined) x += tag("ram:BasisAmount", fmtAmt(ac.baseAmount));
   x += tag("ram:ActualAmount", fmtAmt(ac.amount));
