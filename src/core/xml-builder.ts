@@ -476,6 +476,12 @@ export function buildXml(input: FacturXInvoiceInput, profile: Profile, flavor?: 
   if (payment?.meansCode && atLeast(profile, Profile.BASIC_WL)) {
     let pm = tag("ram:TypeCode", escapeXml(payment.meansCode));
 
+    if (payment.debtorIban)
+      pm += tag(
+        "ram:PayerPartyDebtorFinancialAccount",
+        tag("ram:IBANID", escapeXml(payment.debtorIban)),
+      );
+
     if (payment.iban || payment.accountId || payment.accountName) {
       let acct = "";
       if (payment.iban) acct += tag("ram:IBANID", escapeXml(payment.iban));
@@ -489,12 +495,6 @@ export function buildXml(input: FacturXInvoiceInput, profile: Profile, flavor?: 
       pm += tag(
         "ram:PayeeSpecifiedCreditorFinancialInstitution",
         tag("ram:BICID", escapeXml(payment.bic)),
-      );
-
-    if (payment.debtorIban)
-      pm += tag(
-        "ram:PayerPartyDebtorFinancialAccount",
-        tag("ram:IBANID", escapeXml(payment.debtorIban)),
       );
 
     sett += tag("ram:SpecifiedTradeSettlementPaymentMeans", pm);

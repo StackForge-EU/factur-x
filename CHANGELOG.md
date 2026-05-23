@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **`SpecifiedTradeSettlementPaymentMeans` emitted its child elements in the
+  wrong order.** The EN16931 / CII XSD `TradeSettlementPaymentMeansType`
+  sequence requires `PayerPartyDebtorFinancialAccount` before
+  `PayeePartyCreditorFinancialAccount` and
+  `PayeeSpecifiedCreditorFinancialInstitution`, but the builder appended the
+  debtor account last. Any invoice combining a SEPA direct debit
+  (`payment.meansCode = "59"`) with `payment.debtorIban` plus a payee
+  IBAN/BIC failed XSD validation with `Element 'PayerPartyDebtorFinancialAccount':
+  This element is not expected`. Reordered the three blocks in
+  `src/core/xml-builder.ts`; regression test added in
+  `tests/xml-builder.test.ts`.
+
 ## [1.0.5] — 2026-05-12
 
 - **`ChargeIndicator`'s inner `Indicator` element was emitted in the wrong XML

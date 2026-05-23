@@ -999,3 +999,61 @@ describe("escapeXml control characters", () => {
     expect(escapeXml("\x01A & B\x02")).toBe("A &amp; B");
   });
 });
+
+describe("SpecifiedTradeSettlementPaymentMeans child ordering", () => {
+  // The EN16931 / CII XSD requires this child order inside
+  // TradeSettlementPaymentMeansType:
+  //   TypeCode, Information?, ApplicableTradeSettlementFinancialCard?,
+  //   PayerPartyDebtorFinancialAccount?, PayeePartyCreditorFinancialAccount?,
+  //   PayeeSpecifiedCreditorFinancialInstitution?
+  // Emitting them in any other order makes the document fail XSD validation.
+
+  it("emits debtor account before payee account and creditor financial institution (SEPA DD)", () => {
+    const input = createEn16931Input({
+      payment: {
+        meansCode: "59",
+        iban: "DE89370400440532013000",
+        bic: "COBADEFFXXX",
+        accountName: "StackForge UG",
+        debtorIban: "DE12500105170648489890",
+        paymentReference: "MANDATE-001",
+        dueDate: "2025-07-20",
+      },
+    });
+    const xml = buildXml(input, Profile.EN16931);
+
+    const debtorIdx = xml.indexOf("<ram:PayerPartyDebtorFinancialAccount>");
+    const payeeIdx = xml.indexOf("<ram:PayeePartyCreditorFinancialAccount>");
+    const institutionIdx = xml.indexOf("<ram:PayeeSpecifiedCreditorFinancialInstitution>");
+
+    expect(debtorIdx).toBeGreaterThan(-1);
+    expect(payeeIdx).toBeGreaterThan(-1);
+    expect(institutionIdx).toBeGreaterThan(-1);
+
+    expect(debtorIdx).toBeLessThan(payeeIdx);
+    expect(payeeIdx).toBeLessThan(institutionIdx);
+
+    expect(xml).toContain(
+      "<ram:PayerPartyDebtorFinancialAccount><ram:IBANID>DE12500105170648489890</ram:IBANID></ram:PayerPartyDebtorFinancialAccount>",
+    );
+  });
+
+  it("places TypeCode before any financial account elements", () => {
+    const input = createEn16931Input({
+      payment: {
+        meansCode: "59",
+        iban: "DE89370400440532013000",
+        debtorIban: "DE12500105170648489890",
+        dueDate: "2025-07-20",
+      },
+    });
+    const xml = buildXml(input, Profile.EN16931);
+
+    const typeCodeIdx = xml.indexOf(
+      "<ram:SpecifiedTradeSettlementPaymentMeans><ram:TypeCode>59</ram:TypeCode>",
+    );
+    expect(typeCodeIdx).toBeGreaterThan(-1);
+    const debtorIdx = xml.indexOf("<ram:PayerPartyDebtorFinancialAccount>");
+    expect(debtorIdx).toBeGreaterThan(typeCodeIdx);
+  });
+});
