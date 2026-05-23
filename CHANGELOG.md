@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.6] — 2026-05-23
+
 - **`SpecifiedTradeSettlementPaymentMeans` emitted its child elements in the
   wrong order.** The EN16931 / CII XSD `TradeSettlementPaymentMeansType`
   sequence requires `PayerPartyDebtorFinancialAccount` before
@@ -92,6 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.0.6]: https://github.com/StackForge-EU/factur-x/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/StackForge-EU/factur-x/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/StackForge-EU/factur-x/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/StackForge-EU/factur-x/compare/v1.0.2...v1.0.3
