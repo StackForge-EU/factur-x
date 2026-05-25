@@ -214,6 +214,27 @@ describe("addPdfA3Metadata", () => {
     expect(metadataRef).toBeDefined();
   });
 
+  it("writes Factur-X XMP conformance labels expected by validators", async () => {
+    const en16931 = await embedFacturX({
+      pdf: await createTestPdf(),
+      input: createEn16931Input(),
+      profile: Profile.EN16931,
+    });
+    const basicWl = await embedFacturX({
+      pdf: await createTestPdf(),
+      input: createBasicWlInput(),
+      profile: Profile.BASIC_WL,
+    });
+
+    const en16931Pdf = new TextDecoder().decode(en16931.pdf);
+    const basicWlPdf = new TextDecoder().decode(basicWl.pdf);
+
+    expect(en16931Pdf).toContain("<fx:ConformanceLevel>EN 16931</fx:ConformanceLevel>");
+    expect(en16931Pdf).not.toContain("<fx:ConformanceLevel>EN16931</fx:ConformanceLevel>");
+    expect(basicWlPdf).toContain("<fx:ConformanceLevel>BASIC WL</fx:ConformanceLevel>");
+    expect(basicWlPdf).not.toContain("<fx:ConformanceLevel>BASIC_WL</fx:ConformanceLevel>");
+  });
+
   it("omits XMP metadata when addPdfA3Metadata=false", async () => {
     const pdf = await createTestPdf();
     const result = await embedFacturX({

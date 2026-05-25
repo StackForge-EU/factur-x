@@ -132,6 +132,14 @@ const AF_RELATIONSHIP_MAP: Record<string, AFRelationship> = {
   Source: AFRelationship.Source,
 };
 
+const XMP_CONFORMANCE_LEVEL: Record<Profile, string> = {
+  [Profile.MINIMUM]: "MINIMUM",
+  [Profile.BASIC_WL]: "BASIC WL",
+  [Profile.BASIC]: "BASIC",
+  [Profile.EN16931]: "EN 16931",
+  [Profile.EXTENDED]: "EXTENDED",
+};
+
 /**
  * Adds a PDF/A `/OutputIntents` entry pointing at the supplied RGB ICC
  * profile if the document does not already have one.
@@ -493,7 +501,7 @@ export async function embedFacturX(options: EmbedOptions): Promise<EmbedResult> 
       createDate: isoDate,
       modifyDate: isoDate,
       documentFileName: flavorConfig.attachmentFilename,
-      conformanceLevel: profile,
+      conformanceLevel: XMP_CONFORMANCE_LEVEL[profile],
     });
 
     const xmpBytes = new TextEncoder().encode(xmpXml);
