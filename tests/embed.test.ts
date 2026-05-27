@@ -9,7 +9,10 @@ import {
   createBasicWlInput,
   createBasicInput,
   createEn16931Input,
+  createExtendedInput,
+  createXRechnungInput,
 } from "./helpers";
+import type { FacturXInvoiceInput } from "../src/types/input";
 
 async function createTestPdf(): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
@@ -214,25 +217,59 @@ describe("addPdfA3Metadata", () => {
     expect(metadataRef).toBeDefined();
   });
 
-  it("writes Factur-X XMP conformance labels expected by validators", async () => {
-    const en16931 = await embedFacturX({
+  const profileCases: Array<{
+    profile: Profile;
+    expected: string;
+    makeInput: () => FacturXInvoiceInput;
+  }> = [
+    { profile: Profile.MINIMUM, expected: "MINIMUM", makeInput: createMinimumInput },
+    { profile: Profile.BASIC_WL, expected: "BASIC WL", makeInput: createBasicWlInput },
+    { profile: Profile.BASIC, expected: "BASIC", makeInput: createBasicInput },
+    { profile: Profile.EN16931, expected: "EN 16931", makeInput: createEn16931Input },
+    { profile: Profile.EXTENDED, expected: "EXTENDED", makeInput: createExtendedInput },
+  ];
+
+  it.each(profileCases)(
+    "writes XMP fx:ConformanceLevel '$expected' for profile $profile",
+    async ({ profile, expected, makeInput }) => {
+      const result = await embedFacturX({
+        pdf: await createTestPdf(),
+        input: makeInput(),
+        profile,
+      });
+
+      const pdfText = new TextDecoder().decode(result.pdf);
+      expect(pdfText).toContain(`<fx:ConformanceLevel>${expected}</fx:ConformanceLevel>`);
+      // For profiles whose spec label differs from the enum identifier
+      // (EN16931 → "EN 16931", BASIC_WL → "BASIC WL"), make sure the raw
+      // enum identifier never leaks into the XMP tag.
+      if (profile !== expected) {
+        expect(pdfText).not.toMatch(new RegExp(`<fx:ConformanceLevel>${profile}<`));
+      }
+    },
+  );
+
+  it("writes XMP fx:ConformanceLevel 'XRECHNUNG' when flavor=XRECHNUNG", async () => {
+    const input = createXRechnungInput({
+      document: {
+        id: "XR-TEST-001",
+        issueDate: "2025-06-25",
+        typeCode: DocumentTypeCode.COMMERCIAL_INVOICE,
+        buyerReference: "04011000-12345-67",
+        businessProcessId: "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0",
+      },
+    });
+
+    const result = await embedFacturX({
       pdf: await createTestPdf(),
-      input: createEn16931Input(),
+      input,
       profile: Profile.EN16931,
-    });
-    const basicWl = await embedFacturX({
-      pdf: await createTestPdf(),
-      input: createBasicWlInput(),
-      profile: Profile.BASIC_WL,
+      flavor: Flavor.XRECHNUNG,
     });
 
-    const en16931Pdf = new TextDecoder().decode(en16931.pdf);
-    const basicWlPdf = new TextDecoder().decode(basicWl.pdf);
-
-    expect(en16931Pdf).toContain("<fx:ConformanceLevel>EN 16931</fx:ConformanceLevel>");
-    expect(en16931Pdf).not.toContain("<fx:ConformanceLevel>EN16931</fx:ConformanceLevel>");
-    expect(basicWlPdf).toContain("<fx:ConformanceLevel>BASIC WL</fx:ConformanceLevel>");
-    expect(basicWlPdf).not.toContain("<fx:ConformanceLevel>BASIC_WL</fx:ConformanceLevel>");
+    const pdfText = new TextDecoder().decode(result.pdf);
+    expect(pdfText).toContain("<fx:ConformanceLevel>XRECHNUNG</fx:ConformanceLevel>");
+    expect(pdfText).not.toMatch(/<fx:ConformanceLevel>EN 16931</);
   });
 
   it("omits XMP metadata when addPdfA3Metadata=false", async () => {

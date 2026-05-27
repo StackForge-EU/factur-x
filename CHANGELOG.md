@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **`fx:ConformanceLevel` in the XMP metadata used the raw `Profile` enum
+  identifier instead of the Factur-X / ZUGFeRD spec label.** The XMP packet
+  emitted `EN16931` / `BASIC_WL` where the spec requires `EN 16931` /
+  `BASIC WL`, so strict ZUGFeRD / Factur-X validators (Mustangproject, the
+  FNFE-MPE check tool, veraPDF's Factur-X profile) rejected every PDF this
+  library produced even though the embedded CII XML was correct. Added a
+  `Profile` → XMP-label mapping and routed `buildXmpMetadata` through it in
+  `src/core/embed.ts` (thanks @sco-indy, #2).
+- **`flavor: Flavor.XRECHNUNG` still advertised `EN 16931` in the XMP packet.**
+  Hybrid XRechnung PDFs carry the EN16931 profile internally but per ZUGFeRD
+  2.x §2.4.4 must declare `XRECHNUNG` as the conformance level so the KoSIT /
+  ZUGFeRD validators route them through the XRechnung schematron set rather
+  than the vanilla Factur-X one. `resolveXmpConformanceLevel` in
+  `src/core/embed.ts` now special-cases the XRechnung flavor; the existing
+  `toXRechnung` → XML flow is unaffected. Regression test added in
+  `tests/embed.test.ts` covering all five profiles and the XRechnung flavor.
+
 ## [1.0.6] — 2026-05-23
 
 - **`SpecifiedTradeSettlementPaymentMeans` emitted its child elements in the

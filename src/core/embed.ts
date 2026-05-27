@@ -140,6 +140,15 @@ const XMP_CONFORMANCE_LEVEL: Record<Profile, string> = {
   [Profile.EXTENDED]: "EXTENDED",
 };
 
+// The ZUGFeRD 2.x / Factur-X spec lists "XRECHNUNG" as a valid fx:ConformanceLevel
+// alongside the profile labels. A hybrid XRechnung PDF carries the EN16931 profile
+// internally but must advertise itself as XRECHNUNG so KoSIT/ZUGFeRD validators
+// route it through the XRechnung schematron set rather than vanilla Factur-X.
+function resolveXmpConformanceLevel(profile: Profile, flavor: Flavor): string {
+  if (flavor === Flavor.XRECHNUNG) return "XRECHNUNG";
+  return XMP_CONFORMANCE_LEVEL[profile];
+}
+
 /**
  * Adds a PDF/A `/OutputIntents` entry pointing at the supplied RGB ICC
  * profile if the document does not already have one.
@@ -501,7 +510,7 @@ export async function embedFacturX(options: EmbedOptions): Promise<EmbedResult> 
       createDate: isoDate,
       modifyDate: isoDate,
       documentFileName: flavorConfig.attachmentFilename,
-      conformanceLevel: XMP_CONFORMANCE_LEVEL[profile],
+      conformanceLevel: resolveXmpConformanceLevel(profile, flavor),
     });
 
     const xmpBytes = new TextEncoder().encode(xmpXml);
