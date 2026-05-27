@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.7] — 2026-05-27
+
 - **`fx:ConformanceLevel` in the XMP metadata used the raw `Profile` enum
   identifier instead of the Factur-X / ZUGFeRD spec label.** The XMP packet
   emitted `EN16931` / `BASIC_WL` where the spec requires `EN 16931` /
@@ -111,6 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.0.7]: https://github.com/StackForge-EU/factur-x/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/StackForge-EU/factur-x/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/StackForge-EU/factur-x/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/StackForge-EU/factur-x/compare/v1.0.3...v1.0.4
