@@ -290,7 +290,7 @@ describe("EXTENDED profile", () => {
 
   it("contains seller legal organization", () => {
     expect(xml).toContain("SpecifiedLegalOrganization");
-    expect(xml).toContain("HRB 12345");
+    expect(xml).toContain('<ram:ID schemeID="0002">HRB 12345</ram:ID>');
     expect(xml).toContain("StackForge");
   });
 
@@ -745,11 +745,31 @@ describe("Untested XML elements", () => {
     const input = createMinimumInput({
       seller: {
         ...createMinimumInput().seller,
-        globalId: "4000001000005",
+        globalId: {
+          value: "4000001000005",
+          schemeID: "0088",
+        },
       },
     });
     const xml = buildXml(input, Profile.MINIMUM);
-    expect(xml).toContain("<ram:GlobalID>4000001000005</ram:GlobalID>");
+    expect(xml).toContain('<ram:GlobalID schemeID="0088">4000001000005</ram:GlobalID>');
+  });
+
+  it("includes legal organization ID scheme on seller", () => {
+    const input = createMinimumInput({
+      seller: {
+        ...createMinimumInput().seller,
+        legalOrganization: {
+          id: "HRB 12345",
+          schemeID: "0002",
+          tradingName: "StackForge",
+        },
+      },
+    });
+    const xml = buildXml(input, Profile.MINIMUM);
+    expect(xml).toContain(
+      '<ram:SpecifiedLegalOrganization><ram:ID schemeID="0002">HRB 12345</ram:ID><ram:TradingBusinessName>StackForge</ram:TradingBusinessName></ram:SpecifiedLegalOrganization>',
+    );
   });
 
   it("includes multiple seller IDs", () => {

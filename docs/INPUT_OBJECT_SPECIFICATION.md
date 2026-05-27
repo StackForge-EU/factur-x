@@ -62,16 +62,16 @@ interface FacturXInvoiceInput {
 
 ### TradePartyInput
 
-| Field               | Type                      | BT       | MINIMUM | BASIC WL | EN 16931 |
-| ------------------- | ------------------------- | -------- | :-----: | :------: | :------: |
-| `name`              | `string`                  | BT-27/44 |   ✅    |    ✅    |    ✅    |
-| `id`                | `string \| string[]?`     | BT-29/46 |         |    ✅    |    ✅    |
-| `globalId`          | `string?`                 | BT-29-1  |         |    ✅    |    ✅    |
-| `address`           | `AddressInput?`           | BG-5/8   |         |    ✅    |    ✅    |
-| `contact`           | `ContactInput?`           | BG-6/9   |         |          |    ✅    |
-| `electronicAddress` | `string?`                 | BT-34/49 |         |    ✅    |    ✅    |
-| `taxRegistrations`  | `TaxRegistrationInput[]?` | BT-31/48 |   ✅    |    ✅    |    ✅    |
-| `legalOrganization` | `LegalOrganizationInput?` | BT-30/47 |   ✅    |    ✅    |    ✅    |
+| Field               | Type                         | BT       | MINIMUM | BASIC WL | EN 16931 |
+| ------------------- | ---------------------------- | -------- | :-----: | :------: | :------: |
+| `name`              | `string`                     | BT-27/44 |   ✅    |    ✅    |    ✅    |
+| `id`                | `string \| string[]?`        | BT-29/46 |         |    ✅    |    ✅    |
+| `globalId`          | `IdentifierWithSchemeInput?` | BT-29-1  |         |    ✅    |    ✅    |
+| `address`           | `AddressInput?`              | BG-5/8   |         |    ✅    |    ✅    |
+| `contact`           | `ContactInput?`              | BG-6/9   |         |          |    ✅    |
+| `electronicAddress` | `string?`                    | BT-34/49 |         |    ✅    |    ✅    |
+| `taxRegistrations`  | `TaxRegistrationInput[]?`    | BT-31/48 |   ✅    |    ✅    |    ✅    |
+| `legalOrganization` | `LegalOrganizationInput?`    | BT-30/47 |   ✅    |    ✅    |    ✅    |
 
 ### InvoiceLineInput
 

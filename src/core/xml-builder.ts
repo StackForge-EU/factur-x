@@ -113,7 +113,9 @@ function buildParty(p: TradePartyInput, profile: Profile): string {
     const ids = Array.isArray(p.id) ? p.id : [p.id];
     for (const id of ids) x += tag("ram:ID", escapeXml(id));
   }
-  if (p.globalId) x += tag("ram:GlobalID", escapeXml(p.globalId));
+  if (p.globalId) {
+    x += tag("ram:GlobalID", escapeXml(p.globalId.value), { schemeID: p.globalId.schemeID });
+  }
 
   x += tag("ram:Name", escapeXml(p.name));
 
@@ -122,7 +124,13 @@ function buildParty(p: TradePartyInput, profile: Profile): string {
 
   if (p.legalOrganization) {
     let lo = "";
-    if (p.legalOrganization.id) lo += tag("ram:ID", escapeXml(p.legalOrganization.id));
+    if (p.legalOrganization.id) {
+      lo += tag(
+        "ram:ID",
+        escapeXml(p.legalOrganization.id),
+        p.legalOrganization.schemeID ? { schemeID: p.legalOrganization.schemeID } : undefined,
+      );
+    }
     if (p.legalOrganization.tradingName)
       lo += tag("ram:TradingBusinessName", escapeXml(p.legalOrganization.tradingName));
     x += tag("ram:SpecifiedLegalOrganization", lo);

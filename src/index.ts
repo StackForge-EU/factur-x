@@ -49,6 +49,7 @@ export type {
   NoteInput,
   TaxRegistrationInput,
   LegalOrganizationInput,
+  IdentifierWithSchemeInput,
   BillingPeriodInput,
 } from "./types/input";
 
