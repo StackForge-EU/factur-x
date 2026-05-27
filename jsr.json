@@ -1,6 +1,6 @@
 {
   "name": "@stackforge-eu/factur-x",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "exports": "./src/index.ts",
   "publish": {
     "include": [

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-05-27
+
 - **BREAKING:** Every `ram:GlobalID` and the legal-organization `ram:ID` now
   carry the `@schemeID` attribute required by EN 16931. The XSD-canonical CII
   mapping makes the scheme mandatory on `ram:GlobalID` (BT-29-1 / BT-46-1 for
@@ -151,6 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.1.0]: https://github.com/StackForge-EU/factur-x/compare/v1.0.8...v1.1.0
 [1.0.8]: https://github.com/StackForge-EU/factur-x/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/StackForge-EU/factur-x/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/StackForge-EU/factur-x/compare/v1.0.5...v1.0.6
