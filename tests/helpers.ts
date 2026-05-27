@@ -279,6 +279,7 @@ export function createExtendedInput(overrides?: Partial<FacturXInvoiceInput>): F
       electronicAddress: { value: "info@stack-forge.eu", schemeID: "EM" },
       legalOrganization: {
         id: "HRB 12345",
+        schemeID: "0002",
         tradingName: "StackForge",
       },
     },

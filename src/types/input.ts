@@ -578,8 +578,19 @@ export interface LegalOrganizationInput {
   /** Registration identifier */
   id?: string;
 
+  /** Registration identifier scheme (ICD code list value, e.g. `"0002"` for SIRENE) */
+  schemeID?: string;
+
   /** Trading business name */
   tradingName?: string;
+}
+
+/**
+ * Identifier value with its scheme identifier.
+ */
+export interface IdentifierWithSchemeInput {
+  value: string;
+  schemeID: string;
 }
 
 /**
@@ -601,10 +612,14 @@ export interface TradePartyInput {
   id?: string | string[];
 
   /**
-   * Global identifier with scheme (e.g. GLN `"0088:1234567890123"`).
+   * Global identifier with scheme (e.g. GLN value `"4000001000005"` and
+   * ICD scheme `"0088"`).
+   *
+   * `schemeID` is required by EN 16931 for `ram:GlobalID`.
+   *
    * @see EN 16931 BT-29-1 / BT-46-1
    */
-  globalId?: string;
+  globalId?: IdentifierWithSchemeInput;
 
   /** Postal address — mandatory for BASIC_WL and above */
   address?: AddressInput;
