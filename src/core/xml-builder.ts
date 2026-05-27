@@ -168,7 +168,11 @@ function buildLineItem(line: InvoiceLineInput, profile: Profile): string {
   if (line.note) doc += tag("ram:IncludedNote", tag("ram:Content", escapeXml(line.note)));
 
   let prod = "";
-  if (line.standardIdentifier) prod += tag("ram:GlobalID", escapeXml(line.standardIdentifier));
+  if (line.standardIdentifier) {
+    prod += tag("ram:GlobalID", escapeXml(line.standardIdentifier.value), {
+      schemeID: line.standardIdentifier.schemeID,
+    });
+  }
   if (line.sellerAssignedId) prod += tag("ram:SellerAssignedID", escapeXml(line.sellerAssignedId));
   if (line.buyerAssignedId) prod += tag("ram:BuyerAssignedID", escapeXml(line.buyerAssignedId));
   prod += tag("ram:Name", escapeXml(line.name));

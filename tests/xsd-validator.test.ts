@@ -111,6 +111,24 @@ describe("validateXsd", () => {
     expect(result.errors.length).toBeGreaterThan(0);
   });
 
+  it("validates EN16931 XML with seller.globalId, legalOrganization.schemeID, and line.standardIdentifier", async () => {
+    // Regression: every `ram:GlobalID` and the legal-org `ram:ID` must carry
+    // `@schemeID` per EN 16931 (BT-29-1 / BT-30-1 / BT-157-1). Drives all three
+    // schemed identifiers through the EN16931 XSD in one go.
+    const input = createEn16931Input();
+    input.seller.globalId = { value: "4000001000005", schemeID: "0088" };
+    input.seller.legalOrganization = {
+      id: "HRB 12345",
+      schemeID: "0002",
+      tradingName: "StackForge",
+    };
+    input.lines[0].standardIdentifier = { value: "4012345678901", schemeID: "0160" };
+    const xml = buildXml(input, Profile.EN16931);
+    const result = await validateXsd(xml, Profile.EN16931, { schemaBasePath });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
   it("throws when schema file is missing", async () => {
     await expect(
       validateXsd("<xml/>", Profile.EN16931, { schemaBasePath: "/nonexistent/path" }),

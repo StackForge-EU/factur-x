@@ -750,10 +750,14 @@ export interface InvoiceLineInput {
   description?: string;
 
   /**
-   * Item standard identifier (e.g. GTIN/EAN).
+   * Item standard identifier (e.g. GTIN value `"4012345678901"` and ICD
+   * scheme `"0160"` for GS1).
+   *
+   * `schemeID` is required by EN 16931 for `ram:GlobalID` (BT-157-1).
+   *
    * @see EN 16931 BT-157
    */
-  standardIdentifier?: string;
+  standardIdentifier?: IdentifierWithSchemeInput;
 
   /**
    * Seller-assigned item identifier.

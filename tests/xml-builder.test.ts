@@ -772,6 +772,13 @@ describe("Untested XML elements", () => {
     );
   });
 
+  it("includes line item standard identifier with schemeID", () => {
+    const input = createBasicInput();
+    input.lines[0].standardIdentifier = { value: "4012345678901", schemeID: "0160" };
+    const xml = buildXml(input, Profile.BASIC);
+    expect(xml).toContain('<ram:GlobalID schemeID="0160">4012345678901</ram:GlobalID>');
+  });
+
   it("includes multiple seller IDs", () => {
     const input = createMinimumInput({
       seller: {

@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **BREAKING:** Every `ram:GlobalID` and the legal-organization `ram:ID` now
+  carry the `@schemeID` attribute required by EN 16931. The XSD-canonical CII
+  mapping makes the scheme mandatory on `ram:GlobalID` (BT-29-1 / BT-46-1 for
+  parties, BT-157-1 for line items) and conditional on
+  `ram:SpecifiedLegalOrganization/ram:ID` (BT-30-1 / BT-47-1); without these
+  attributes Mustang / KoSIT / veraPDF's Factur-X profile reject the invoice
+  even though the embedded CII looked superficially correct. Three input
+  fields changed:
+  - `TradePartyInput.globalId` is now `IdentifierWithSchemeInput`
+    (`{ value: string; schemeID: string }`) instead of a bare `string`
+  - `InvoiceLineInput.standardIdentifier` is now `IdentifierWithSchemeInput`
+    instead of a bare `string` (sibling fix on top of #4 — the line-item
+    `ram:GlobalID` had the same defect as the party one)
+  - `LegalOrganizationInput.schemeID?: string` added (optional, mirrors the
+    conditional spec rule)
+  Migration: `globalId: "4000001000005"` →
+  `globalId: { value: "4000001000005", schemeID: "0088" }` (and the analogous
+  rewrite for `standardIdentifier`). The new `IdentifierWithSchemeInput` type
+  is exported from `src/index.ts`. Regression test added in
+  `tests/xsd-validator.test.ts` that drives all three schemed identifiers
+  through the EN16931 XSD in one go (thanks @sco-indy, #4).
+
 ## [1.0.8] — 2026-05-27
 
 - **PDF trailer was missing the `/ID` entry required by PDF/A-3.** ISO 19005-3
