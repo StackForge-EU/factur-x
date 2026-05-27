@@ -164,8 +164,10 @@ function resolveXmpConformanceLevel(profile: Profile, flavor: Flavor): string {
  * first identifier. Otherwise, treat the newly generated PDF as the first
  * version and use the same content-derived identifier for both identifiers.
  */
-function updatePdfIdTrailer(pdfDoc: PDFDocument, pdfContentBytes: Uint8Array): void {
+function ensureIdTrailer(pdfDoc: PDFDocument, pdfContentBytes: Uint8Array): void {
   const existingIdTrailer = pdfDoc.context.trailerInfo.ID;
+  // MD5 is the algorithm recommended by PDF 1.7 §14.4 for the trailer file
+  // identifier — uniqueness is what matters here, not cryptographic strength.
   const currentContentHash = PDFHexString.of(createHash("md5").update(pdfContentBytes).digest("hex"));
 
   const hasValidIdTrailer = existingIdTrailer instanceof PDFArray && existingIdTrailer.size() === 2;
@@ -554,7 +556,7 @@ export async function embedFacturX(options: EmbedOptions): Promise<EmbedResult> 
 
   let pdfContentBytes = await pdfDoc.save();
   if (addPdfA3Metadata) {
-    updatePdfIdTrailer(pdfDoc, pdfContentBytes);
+    ensureIdTrailer(pdfDoc, pdfContentBytes);
     pdfContentBytes = await pdfDoc.save();
   }
 

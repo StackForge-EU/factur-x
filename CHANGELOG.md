@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **PDF trailer was missing the `/ID` entry required by PDF/A-3.** ISO 19005-3
+  (and PDF 1.7 §14.4) require the trailer dictionary to carry an `/ID` array of
+  two byte strings: the first immutable identifier of the original document,
+  the second updated on every modification. `pdf-lib` initializes
+  `trailerInfo = {}` and never writes one on save, so veraPDF and the FNFE-MPE
+  Factur-X profile rejected every PDF this library produced as non-conformant.
+  Added `ensureIdTrailer` in `src/core/embed.ts` which runs after the first
+  `pdfDoc.save()` when `addPdfA3Metadata` is on: it computes an MD5 over the
+  serialized bytes (per PDF 1.7 §14.4 — uniqueness, not cryptographic strength,
+  is what matters), preserves any pre-existing first identifier, and writes the
+  pair before re-saving. Regression tests added in `tests/embed.test.ts`
+  covering both the no-existing-trailer and existing-trailer paths (thanks
+  @sco-indy, #3).
+
 ## [1.0.7] — 2026-05-27
 
 - **`fx:ConformanceLevel` in the XMP metadata used the raw `Profile` enum

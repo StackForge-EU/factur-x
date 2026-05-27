@@ -283,7 +283,7 @@ describe("addPdfA3Metadata", () => {
     expect(pdfText).not.toMatch(/<fx:ConformanceLevel>EN 16931</);
   });
 
-  describe('adds an "ID" entry to the document trailer dictionary', () => {
+  describe("adds an /ID entry to the document trailer dictionary", () => {
     it("when the document has no such trailer, the two identifiers are the same", async () => {
       const pdf = await createTestPdf();
       const result = await embedFacturX({
