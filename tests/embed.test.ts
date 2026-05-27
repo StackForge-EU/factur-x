@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PDFDocument, PDFName, PDFDict, PDFArray } from "pdf-lib";
+import { PDFDocument, PDFName, PDFDict, PDFArray, PDFHexString } from "pdf-lib";
 import { embedFacturX } from "../src/core/embed";
 import { buildXml } from "../src/core/xml-builder";
 import { Profile, Flavor } from "../src/flavors/constants";
@@ -204,6 +204,17 @@ describe("Flavor handling", () => {
 });
 
 describe("addPdfA3Metadata", () => {
+  function getIdTrailerValues(pdfDoc: PDFDocument): [string, string] | undefined {
+    const id = pdfDoc.context.trailerInfo.ID;
+    if (!(id instanceof PDFArray) || id.size() !== 2) return undefined;
+
+    const first = id.lookup(0);
+    const second = id.lookup(1);
+    if (!(first instanceof PDFHexString) || !(second instanceof PDFHexString)) return undefined;
+
+    return [first.asString(), second.asString()];
+  }
+
   it("adds XMP metadata by default", async () => {
     const pdf = await createTestPdf();
     const result = await embedFacturX({
@@ -270,6 +281,51 @@ describe("addPdfA3Metadata", () => {
     const pdfText = new TextDecoder().decode(result.pdf);
     expect(pdfText).toContain("<fx:ConformanceLevel>XRECHNUNG</fx:ConformanceLevel>");
     expect(pdfText).not.toMatch(/<fx:ConformanceLevel>EN 16931</);
+  });
+
+  describe('adds an "ID" entry to the document trailer dictionary', () => {
+    it("when the document has no such trailer, the two identifiers are the same", async () => {
+      const pdf = await createTestPdf();
+      const result = await embedFacturX({
+        pdf,
+        input: createEn16931Input(),
+        profile: Profile.EN16931,
+      });
+
+      const pdfDoc = await PDFDocument.load(result.pdf, { updateMetadata: false });
+      const fileIds = getIdTrailerValues(pdfDoc);
+
+      expect(fileIds).toBeDefined();
+      expect(fileIds![0]).toMatch(/^[0-9a-f]{32}$/i);
+      expect(fileIds![1]).toMatch(/^[0-9a-f]{32}$/i);
+      expect(fileIds![1]).toBe(fileIds![0]);
+    });
+
+    it("when the document has such trailer, preserves the first identifier and refreshes the second identifier based on the updated file content", async () => {
+      const seedDoc = await PDFDocument.create();
+      seedDoc.addPage([595, 842]);
+      const originalFileIds: [string, string] = [
+        "00112233445566778899aabbccddeeff",
+        "ffeeddccbbaa99887766554433221100",
+      ];
+      seedDoc.context.trailerInfo.ID = seedDoc.context.obj(
+        originalFileIds.map((id) => PDFHexString.of(id)),
+      );
+      const pdf = await seedDoc.save();
+
+      const result = await embedFacturX({
+        pdf,
+        input: createEn16931Input(),
+        profile: Profile.EN16931,
+      });
+
+      const pdfDoc = await PDFDocument.load(result.pdf, { updateMetadata: false });
+      const fileIds = getIdTrailerValues(pdfDoc);
+      expect(fileIds).toBeDefined();
+      expect(fileIds![0]).toBe(originalFileIds[0]);
+      expect(fileIds![1]).toMatch(/^[0-9a-f]{32}$/i);
+      expect(fileIds![1]).not.toBe(originalFileIds[1]);
+    });
   });
 
   it("omits XMP metadata when addPdfA3Metadata=false", async () => {
