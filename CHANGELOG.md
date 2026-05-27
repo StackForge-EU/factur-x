@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.8] — 2026-05-27
+
 - **PDF trailer was missing the `/ID` entry required by PDF/A-3.** ISO 19005-3
   (and PDF 1.7 §14.4) require the trailer dictionary to carry an `/ID` array of
   two byte strings: the first immutable identifier of the original document,
@@ -127,6 +129,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.0.8]: https://github.com/StackForge-EU/factur-x/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/StackForge-EU/factur-x/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/StackForge-EU/factur-x/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/StackForge-EU/factur-x/compare/v1.0.4...v1.0.5
