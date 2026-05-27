@@ -10,6 +10,7 @@
 
 import type { Buffer } from "node:buffer";
 import console from "node:console";
+import { createHash } from "node:crypto";
 import {
   PDFDocument,
   PDFName,
@@ -17,6 +18,7 @@ import {
   PDFDict,
   PDFRef,
   PDFString,
+  PDFHexString,
   AFRelationship,
 } from "pdf-lib";
 
@@ -147,6 +149,33 @@ const XMP_CONFORMANCE_LEVEL: Record<Profile, string> = {
 function resolveXmpConformanceLevel(profile: Profile, flavor: Flavor): string {
   if (flavor === Flavor.XRECHNUNG) return "XRECHNUNG";
   return XMP_CONFORMANCE_LEVEL[profile];
+}
+
+/**
+ * PDF/A-3 requires the trailer dictionary to contain `/ID`, an array of two
+ * file identifier strings. The first one is immutable and represents the
+ * initial state of the PDF document. The second one is updated each time the
+ * document is modified. In the first version of the document, the two identifiers
+ * are the same.
+ *
+ * See: PDF 1.7 specifications, section 14.4
+ *
+ * In this function: if the original file identifier exists, use it as the
+ * first identifier. Otherwise, treat the newly generated PDF as the first
+ * version and use the same content-derived identifier for both identifiers.
+ */
+function updatePdfIdTrailer(pdfDoc: PDFDocument, pdfContentBytes: Uint8Array): void {
+  const existingIdTrailer = pdfDoc.context.trailerInfo.ID;
+  const currentContentHash = PDFHexString.of(createHash("md5").update(pdfContentBytes).digest("hex"));
+
+  const hasValidIdTrailer = existingIdTrailer instanceof PDFArray && existingIdTrailer.size() === 2;
+
+  if (hasValidIdTrailer) {
+    const existingFirstId = existingIdTrailer.lookup(0);
+    pdfDoc.context.trailerInfo.ID = pdfDoc.context.obj([existingFirstId, currentContentHash]);
+  } else {
+    pdfDoc.context.trailerInfo.ID = pdfDoc.context.obj([currentContentHash, currentContentHash]);
+  }
 }
 
 /**
@@ -523,10 +552,14 @@ export async function embedFacturX(options: EmbedOptions): Promise<EmbedResult> 
     pdfDoc.catalog.set(PDFName.of("Metadata"), metadataRef);
   }
 
-  const resultPdf = await pdfDoc.save();
+  let pdfContentBytes = await pdfDoc.save();
+  if (addPdfA3Metadata) {
+    updatePdfIdTrailer(pdfDoc, pdfContentBytes);
+    pdfContentBytes = await pdfDoc.save();
+  }
 
   return {
-    pdf: resultPdf,
+    pdf: pdfContentBytes,
     xml,
     ...(validation ? { validation } : {}),
     ...(xsdValidation ? { xsdValidation } : {}),
