@@ -7,9 +7,8 @@ are **not** distributed with this repository.
 
 Download the official release packages from:
 
-- **ZUGFeRD 2.4 (EN):** <https://www.ferd-net.de/publikationen-produkte/publikationen/detailseite/zugferd-24-english>
-- **ZUGFeRD 2.4 (DE):** <https://www.ferd-net.de/publikationen-produkte/publikationen/detailseite/zugferd-24>
-- **Factur-X 1.08 (FR):** <https://fnfe-mpe.org/factur-x/>
+- **ZUGFeRD 2.5 (FeRD, EN/DE):** <https://www.ferd-net.de/publikationen-produkte/publikationen>
+- **Factur-X 1.09 (FNFE-MPE, FR):** <https://fnfe-mpe.org/factur-x/>
 
 The release packages contain:
 

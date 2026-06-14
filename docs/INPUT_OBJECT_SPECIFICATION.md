@@ -2,7 +2,7 @@
 
 > **Purpose:** Define the structured input object for Factur-X invoice generation.  
 > **Audience:** Developers integrating this package.  
-> **Reference:** EN 16931-1, Factur-X 1.08 technical specifications.
+> **Reference:** EN 16931-1, Factur-X 1.09 technical specifications.
 
 ---
 

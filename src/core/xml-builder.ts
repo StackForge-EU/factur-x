@@ -300,7 +300,7 @@ function buildMonetarySummation(t: InvoiceTotalsInput, profile: Profile): string
 /**
  * Builds a UN/CEFACT CrossIndustryInvoice XML string from structured input.
  *
- * The output conforms to the Factur-X 1.08 / ZUGFeRD 2.4 CII schema at the
+ * The output conforms to the Factur-X 1.09 / ZUGFeRD 2.5 CII schema at the
  * requested {@link Profile} level. Elements that do not belong to the chosen
  * profile are silently omitted.
  *

@@ -60,7 +60,7 @@ export const FLAVOR_CONFIGS: Record<Flavor, FlavorConfig> = {
     defaultTypeCode: DocumentTypeCode.COMMERCIAL_INVOICE,
     attachmentFilename: "factur-x.xml",
     embedInPdf: true,
-    description: "German electronic invoice format. ZUGFeRD 2.4 uses factur-x.xml.",
+    description: "German electronic invoice format. ZUGFeRD 2.5 uses factur-x.xml.",
   },
   [Flavor.XRECHNUNG]: {
     name: "XRechnung",

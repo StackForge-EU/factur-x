@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **Updated to Factur-X 1.09 / ZUGFeRD 2.5** (spec dated 2026-06-10). Factur-X
+  1.09 keeps the same UN/CEFACT CII **D22B** syntax, namespaces, and profile URNs
+  (`urn:factur-x.eu:1p0:*`) as 1.08, so this is a backward-compatible refresh:
+  XML produced by previous versions remains valid, and no input/output changes
+  are required.
+  - Bundled XSD schemas under `schema/` swapped to the official 1.09 set
+    (filenames normalized to the repo convention, internal `schemaLocation`
+    references rewritten to match). For MINIMUM / BASIC WL / BASIC / EN 16931 the
+    XSDs are content-identical to 1.08; the EXTENDED XSD gains only **optional**
+    additions (debited-account name, financial adjustment / charges on behalf of
+    a third party, an optional `listID` attribute on the allowance/charge reason
+    code).
+  - Reference `.sch` (Schematron) and `_codedb.xml` files updated to the 1.09
+    code lists and CEN validation rules (effective 2026-05-15). These are not
+    shipped in the npm package and not used at runtime — this library performs
+    XSD validation only.
+  - The remaining 1.09 changes (new EXTENDED-only business terms anticipating the
+    revised EN 16931 2026 — e.g. document-level non-VAT tax codes, VAT exemption
+    reasons on document-level allowances/charges, product manufacturer block) are
+    optional EXTENDED fields not currently emitted by the builder; they can be
+    added later without breaking changes.
+  - Documentation and code comments updated from "1.08 / 2.4" to "1.09 / 2.5".
+
 ## [1.1.0] — 2026-05-27
 
 - **BREAKING:** Every `ram:GlobalID` and the legal-organization `ram:ID` now

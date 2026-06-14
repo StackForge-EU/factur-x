@@ -13,7 +13,7 @@
 This TypeScript/Node.js package takes a simple, typed invoice input object and:
 
 1. Validates it against profile requirements
-2. Generates UN/CEFACT CII XML (Factur-X 1.08 / ZUGFeRD 2.4)
+2. Generates UN/CEFACT CII XML (Factur-X 1.09 / ZUGFeRD 2.5)
 3. Validates the XML against official XSD schemas (via WASM)
 4. Embeds it into a PDF with PDF/A-3b metadata
 5. Or outputs standalone XRechnung XML for German B2G use
@@ -68,8 +68,8 @@ import { embedFacturX, Profile } from "jsr:@stackforge-eu/factur-x";
 
 | Flavor              | Region      | Output   | Notes                         |
 | ------------------- | ----------- | -------- | ----------------------------- |
-| `Flavor.FACTUR_X`   | France / EU | PDF/A-3  | Default, Factur-X 1.08        |
-| `Flavor.ZUGFERD`    | Germany     | PDF/A-3  | ZUGFeRD 2.4 (= Factur-X 1.08) |
+| `Flavor.FACTUR_X`   | France / EU | PDF/A-3  | Default, Factur-X 1.09        |
+| `Flavor.ZUGFERD`    | Germany     | PDF/A-3  | ZUGFeRD 2.5 (= Factur-X 1.09) |
 | `Flavor.XRECHNUNG`  | Germany B2G | XML only | PEPPOL business process       |
 | `Flavor.CHRONO_PRO` | Belgium     | PDF/A-3  | Chrono Pro conventions        |
 

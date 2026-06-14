@@ -278,7 +278,7 @@ function findUnembeddedFonts(pdfDoc: PDFDocument): string[] {
 /**
  * Resolves the AF relationship for the PDF attachment based on profile level.
  *
- * Per the Factur-X 1.08 specification (§6.3):
+ * Per the Factur-X 1.09 specification (§6.3):
  * - MINIMUM / BASIC_WL → `Data`
  * - BASIC / EN16931 / EXTENDED → `Alternative`
  */

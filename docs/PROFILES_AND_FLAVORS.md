@@ -22,8 +22,8 @@ Profiles define the **semantic depth** of the invoice XML. Higher profiles requi
 
 Flavors adapt the output for **specific countries or platforms**:
 
-- **factur-x:** France / EU default (Factur-X 1.08)
-- **zugferd:** Germany (ZUGFeRD 2.4 = Factur-X 1.08)
+- **factur-x:** France / EU default (Factur-X 1.09)
+- **zugferd:** Germany (ZUGFeRD 2.5 = Factur-X 1.09)
 - **xrechnung:** Germany B2G — pure XML, no PDF embedding
 - **chrono-pro:** Belgium (Chrono Pro conventions)
 
