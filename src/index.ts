@@ -51,6 +51,7 @@ export type {
   LegalOrganizationInput,
   IdentifierWithSchemeInput,
   BillingPeriodInput,
+  FinancialAdjustmentInput,
 } from "./types/input";
 
 // ── Profile & Flavor constants ───────────────────────────────────────────

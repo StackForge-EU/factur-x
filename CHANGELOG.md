@@ -23,12 +23,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
     code lists and CEN validation rules (effective 2026-05-15). These are not
     shipped in the npm package and not used at runtime — this library performs
     XSD validation only.
-  - The remaining 1.09 changes (new EXTENDED-only business terms anticipating the
-    revised EN 16931 2026 — e.g. document-level non-VAT tax codes, VAT exemption
-    reasons on document-level allowances/charges, product manufacturer block) are
-    optional EXTENDED fields not currently emitted by the builder; they can be
-    added later without breaking changes.
   - Documentation and code comments updated from "1.08 / 2.4" to "1.09 / 2.5".
+
+- **New optional EXTENDED-profile input fields** for selected Factur-X 1.09
+  business terms (all additive, only emitted at `Profile.EXTENDED`):
+  - `PaymentInput.debtorAccountName` (BT-216) and `PaymentInput.debtorBic`
+    (BT-215) — debited-account name and its payment service provider BIC.
+  - `AllowanceChargeInput.exemptionReason` / `exemptionReasonCode`
+    (BT-173–176) — VAT exemption reason/code on document-level allowances and
+    charges.
+  - `FacturXInvoiceInput.financialAdjustments` (BG-34, new
+    `FinancialAdjustmentInput` with `reason` BT-180 + `amount` BT-179) —
+    charges collected on behalf of a third party.
+  - `InvoiceLineInput.manufacturer` (BG-X-94) — line-level product manufacturer
+    party (`ram:ManufacturerTradeParty`).
+  - Remaining 1.09 EXTENDED terms (e.g. document-level non-VAT tax codes,
+    logistic-service-charge exemption reasons) are still not emitted and can be
+    added later without breaking changes.
 
 ## [1.1.0] — 2026-05-27
 
