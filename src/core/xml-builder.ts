@@ -566,6 +566,18 @@ export function buildXml(input: FacturXInvoiceInput, profile: Profile, flavor?: 
   // Monetary summation
   sett += buildMonetarySummation(totals, profile);
 
+  // Charges collected on behalf of a third party (BG-34, EXTENDED). In the CII
+  // sequence SpecifiedFinancialAdjustment sits after the monetary summation and
+  // before InvoiceReferencedDocument (preceding invoice references).
+  if (input.financialAdjustments && atLeast(profile, Profile.EXTENDED)) {
+    for (const fa of input.financialAdjustments) {
+      sett += tag(
+        "ram:SpecifiedFinancialAdjustment",
+        tag("ram:Reason", escapeXml(fa.reason)) + tag("ram:ActualAmount", fmtAmt(fa.amount)),
+      );
+    }
+  }
+
   // Preceding invoice references
   if (input.references && atLeast(profile, Profile.BASIC_WL)) {
     for (const ref of input.references) {

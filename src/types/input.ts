@@ -1257,4 +1257,35 @@ export interface FacturXInvoiceInput {
    * @since BASIC_WL
    */
   sellerTaxRepresentative?: TradePartyInput;
+
+  /**
+   * Charges collected on behalf of a third party (document level).
+   * @see Factur-X EXTENDED BG-34, Factur-X 1.09
+   * @since EXTENDED
+   */
+  financialAdjustments?: FinancialAdjustmentInput[];
+}
+
+// ---------------------------------------------------------------------------
+// Financial adjustment (charges on behalf of a third party, EXTENDED)
+// ---------------------------------------------------------------------------
+
+/**
+ * A charge collected on behalf of a third party.
+ *
+ * @see Factur-X EXTENDED BG-34 (`ram:SpecifiedFinancialAdjustment`), Factur-X 1.09
+ * @since EXTENDED
+ */
+export interface FinancialAdjustmentInput {
+  /**
+   * Specification of the charge collected on behalf of a third party.
+   * @see Factur-X EXTENDED BT-180
+   */
+  reason: string;
+
+  /**
+   * Charge amount collected on behalf of a third party.
+   * @see Factur-X EXTENDED BT-179
+   */
+  amount: number;
 }

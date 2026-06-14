@@ -180,6 +180,20 @@ describe("validateXsd", () => {
     expect(result.errors).toHaveLength(0);
   });
 
+  it("validates EXTENDED XML with charges on behalf of a third party (BG-34)", async () => {
+    const xml = buildXml(
+      createExtendedInput({
+        financialAdjustments: [{ reason: "Eco-participation levy", amount: 12.5 }],
+      }),
+      Profile.EXTENDED,
+    );
+    expect(xml).toContain("<ram:SpecifiedFinancialAdjustment>");
+    expect(xml).toContain("Eco-participation levy");
+    const result = await validateXsd(xml, Profile.EXTENDED, { schemaBasePath });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
   it("throws when schema file is missing", async () => {
     await expect(
       validateXsd("<xml/>", Profile.EN16931, { schemaBasePath: "/nonexistent/path" }),
