@@ -129,6 +129,33 @@ describe("validateXsd", () => {
     expect(result.errors).toHaveLength(0);
   });
 
+  it("validates EXTENDED XML with debtor account name + BIC (BT-215/216)", async () => {
+    // Factur-X 1.09 EXTENDED additions: AccountName on the debtor account and
+    // a PayerSpecifiedDebtorFinancialInstitution/BICID. Both must land in the
+    // correct slot of TradeSettlementPaymentMeansType.
+    const xml = buildXml(
+      createExtendedInput({
+        payment: {
+          meansCode: "59",
+          iban: "DE89370400440532013000",
+          bic: "COBADEFFXXX",
+          mandateId: "MNDT-1",
+          creditorReference: "DE98ZZZ09999999999",
+          debtorIban: "FR7630006000011234567890189",
+          debtorAccountName: "Kite-Engineer Current Account",
+          debtorBic: "BNPAFRPPXXX",
+          dueDate: "2025-07-25",
+        },
+      }),
+      Profile.EXTENDED,
+    );
+    expect(xml).toContain("<ram:PayerSpecifiedDebtorFinancialInstitution>");
+    expect(xml).toContain("Kite-Engineer Current Account");
+    const result = await validateXsd(xml, Profile.EXTENDED, { schemaBasePath });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
   it("throws when schema file is missing", async () => {
     await expect(
       validateXsd("<xml/>", Profile.EN16931, { schemaBasePath: "/nonexistent/path" }),

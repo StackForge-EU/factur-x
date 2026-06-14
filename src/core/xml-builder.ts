@@ -488,11 +488,16 @@ export function buildXml(input: FacturXInvoiceInput, profile: Profile, flavor?: 
   if (payment?.meansCode && atLeast(profile, Profile.BASIC_WL)) {
     let pm = tag("ram:TypeCode", escapeXml(payment.meansCode));
 
-    if (payment.debtorIban)
-      pm += tag(
-        "ram:PayerPartyDebtorFinancialAccount",
-        tag("ram:IBANID", escapeXml(payment.debtorIban)),
-      );
+    // CII TradeSettlementPaymentMeansType sequence: debtor account, payee
+    // account, debtor institution, payee institution — emit in that order.
+    if (payment.debtorIban) {
+      let dacct = tag("ram:IBANID", escapeXml(payment.debtorIban));
+      // BT-216 (debtor account name), EXTENDED only. The element requires the
+      // IBAN to be present, so it is only emitted alongside debtorIban.
+      if (payment.debtorAccountName && atLeast(profile, Profile.EXTENDED))
+        dacct += tag("ram:AccountName", escapeXml(payment.debtorAccountName));
+      pm += tag("ram:PayerPartyDebtorFinancialAccount", dacct);
+    }
 
     if (payment.iban || payment.accountId || payment.accountName) {
       let acct = "";
@@ -502,6 +507,13 @@ export function buildXml(input: FacturXInvoiceInput, profile: Profile, flavor?: 
         acct += tag("ram:AccountName", escapeXml(payment.accountName));
       pm += tag("ram:PayeePartyCreditorFinancialAccount", acct);
     }
+
+    // BT-215 (debtor PSP BIC), EXTENDED only.
+    if (payment.debtorBic && atLeast(profile, Profile.EXTENDED))
+      pm += tag(
+        "ram:PayerSpecifiedDebtorFinancialInstitution",
+        tag("ram:BICID", escapeXml(payment.debtorBic)),
+      );
 
     if (payment.bic && atLeast(profile, Profile.EN16931))
       pm += tag(

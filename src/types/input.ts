@@ -916,6 +916,24 @@ export interface PaymentInput {
   debtorIban?: string;
 
   /**
+   * Debtor account name (holder of the debited account). Only emitted when
+   * {@link PaymentInput.debtorIban} is also set, since the CII schema requires
+   * the IBAN on the debtor account element.
+   * @see Factur-X EXTENDED BT-216 ("Debited account name", Factur-X 1.09)
+   * @since EXTENDED
+   */
+  debtorAccountName?: string;
+
+  /**
+   * BIC/SWIFT of the debtor's payment service provider (the debited account's
+   * financial institution).
+   * @see Factur-X EXTENDED BT-215 ("Debited account payment service provider
+   *   identifier", Factur-X 1.09)
+   * @since EXTENDED
+   */
+  debtorBic?: string;
+
+  /**
    * Payment terms description (free text).
    * @see EN 16931 BT-20
    */
