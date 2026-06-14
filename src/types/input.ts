@@ -840,6 +840,20 @@ export interface AllowanceChargeInput {
 
   /** VAT rate for this allowance/charge */
   vatRatePercent?: number;
+
+  /**
+   * VAT exemption reason text for this document-level allowance/charge.
+   * @see Factur-X EXTENDED BT-173 (allowance) / BT-175 (charge), Factur-X 1.09
+   * @since EXTENDED
+   */
+  exemptionReason?: string;
+
+  /**
+   * VAT exemption reason code for this document-level allowance/charge.
+   * @see Factur-X EXTENDED BT-174 (allowance) / BT-176 (charge), Factur-X 1.09
+   * @since EXTENDED
+   */
+  exemptionReasonCode?: string;
 }
 
 // ---------------------------------------------------------------------------

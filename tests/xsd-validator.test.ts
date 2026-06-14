@@ -156,6 +156,30 @@ describe("validateXsd", () => {
     expect(result.errors).toHaveLength(0);
   });
 
+  it("validates EXTENDED XML with VAT exemption reason on allowance/charge (BT-173..176)", async () => {
+    const xml = buildXml(
+      createExtendedInput({
+        allowancesCharges: [
+          {
+            isCharge: false,
+            amount: 50,
+            reason: "Loyalty discount",
+            vatCategoryCode: "E",
+            vatRatePercent: 0,
+            exemptionReason: "Exempt under §4 UStG",
+            exemptionReasonCode: "VATEX-EU-79-C",
+          },
+        ],
+      }),
+      Profile.EXTENDED,
+    );
+    expect(xml).toContain("<ram:ExemptionReason>Exempt under");
+    expect(xml).toContain("<ram:ExemptionReasonCode>VATEX-EU-79-C");
+    const result = await validateXsd(xml, Profile.EXTENDED, { schemaBasePath });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
   it("throws when schema file is missing", async () => {
     await expect(
       validateXsd("<xml/>", Profile.EN16931, { schemaBasePath: "/nonexistent/path" }),

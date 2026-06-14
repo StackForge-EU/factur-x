@@ -227,7 +227,7 @@ function buildLineItem(line: InvoiceLineInput, profile: Profile): string {
 // Document-level allowances / charges (BASIC_WL+)
 // ---------------------------------------------------------------------------
 
-function buildAllowanceCharge(ac: AllowanceChargeInput): string {
+function buildAllowanceCharge(ac: AllowanceChargeInput, profile: Profile): string {
   // BT-1001 / BT-92 / BT-99: ChargeIndicator's inner Indicator element lives in
   // the UnqualifiedDataType (udt) namespace, not the ram namespace. The XSD
   // rejects `<ram:Indicator>`, and the schematron's BR-S-08 / BR-CO-11 / BR-CO-14
@@ -240,8 +240,16 @@ function buildAllowanceCharge(ac: AllowanceChargeInput): string {
   if (ac.reasonCode) x += tag("ram:ReasonCode", escapeXml(ac.reasonCode));
   if (ac.reason) x += tag("ram:Reason", escapeXml(ac.reason));
   if (ac.vatCategoryCode || ac.vatRatePercent !== undefined) {
+    // CII TradeTaxType sequence: TypeCode, ExemptionReason, …, CategoryCode,
+    // ExemptionReasonCode, …, RateApplicablePercent. The exemption fields are
+    // EXTENDED-only (BT-173..176).
+    const extended = atLeast(profile, Profile.EXTENDED);
     let tx = tag("ram:TypeCode", "VAT");
+    if (extended && ac.exemptionReason)
+      tx += tag("ram:ExemptionReason", escapeXml(ac.exemptionReason));
     if (ac.vatCategoryCode) tx += tag("ram:CategoryCode", escapeXml(ac.vatCategoryCode));
+    if (extended && ac.exemptionReasonCode)
+      tx += tag("ram:ExemptionReasonCode", escapeXml(ac.exemptionReasonCode));
     if (ac.vatRatePercent !== undefined)
       tx += tag("ram:RateApplicablePercent", ac.vatRatePercent.toString());
     x += tag("ram:CategoryTradeTax", tx);
@@ -539,7 +547,7 @@ export function buildXml(input: FacturXInvoiceInput, profile: Profile, flavor?: 
 
   // Allowances / charges
   if (input.allowancesCharges && atLeast(profile, Profile.BASIC_WL))
-    for (const ac of input.allowancesCharges) sett += buildAllowanceCharge(ac);
+    for (const ac of input.allowancesCharges) sett += buildAllowanceCharge(ac, profile);
 
   // Payment terms (due date, mandate, description)
   const dueDate = payment?.dueDate ?? doc.dueDate;
