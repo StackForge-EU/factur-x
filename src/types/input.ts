@@ -795,6 +795,15 @@ export interface InvoiceLineInput {
    * @since EN16931
    */
   buyerOrderLineId?: string;
+
+  /**
+   * Product manufacturer of this line item. Uses the standard trade-party
+   * shape; only id/globalId (BT-X-600), name (BT-X-598), and postal address
+   * (BG-X-93) are typically relevant.
+   * @see Factur-X EXTENDED BG-X-94, Factur-X 1.09
+   * @since EXTENDED
+   */
+  manufacturer?: TradePartyInput;
 }
 
 // ---------------------------------------------------------------------------

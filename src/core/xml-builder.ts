@@ -179,6 +179,10 @@ function buildLineItem(line: InvoiceLineInput, profile: Profile): string {
   if (line.description) prod += tag("ram:Description", escapeXml(line.description));
   if (line.originCountry && atLeast(profile, Profile.EN16931))
     prod += tag("ram:OriginTradeCountry", tag("ram:ID", escapeXml(line.originCountry)));
+  // Product manufacturer (BG-X-94, EXTENDED). In TradeProductType the
+  // ManufacturerTradeParty element follows OriginTradeCountry.
+  if (line.manufacturer && atLeast(profile, Profile.EXTENDED))
+    prod += tag("ram:ManufacturerTradeParty", buildParty(line.manufacturer, profile));
 
   let agree = "";
   if (line.buyerOrderLineId && atLeast(profile, Profile.EN16931))

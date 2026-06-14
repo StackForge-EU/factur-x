@@ -194,6 +194,21 @@ describe("validateXsd", () => {
     expect(result.errors).toHaveLength(0);
   });
 
+  it("validates EXTENDED XML with a line-level product manufacturer (BG-X-94)", async () => {
+    const input = createExtendedInput();
+    input.lines[0].manufacturer = {
+      name: "Acme Manufacturing GmbH",
+      globalId: { value: "4012345000009", schemeID: "0088" },
+      address: { line1: "Werkstraße 1", city: "Köln", postalCode: "50667", country: "DE" },
+    };
+    const xml = buildXml(input, Profile.EXTENDED);
+    expect(xml).toContain("<ram:ManufacturerTradeParty>");
+    expect(xml).toContain("Acme Manufacturing GmbH");
+    const result = await validateXsd(xml, Profile.EXTENDED, { schemaBasePath });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
   it("throws when schema file is missing", async () => {
     await expect(
       validateXsd("<xml/>", Profile.EN16931, { schemaBasePath: "/nonexistent/path" }),
