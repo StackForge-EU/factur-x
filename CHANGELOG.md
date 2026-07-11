@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-07-11
+
 - **Updated to Factur-X 1.09 / ZUGFeRD 2.5** (spec dated 2026-06-10). Factur-X
   1.09 keeps the same UN/CEFACT CII **D22B** syntax, namespaces, and profile URNs
   (`urn:factur-x.eu:1p0:*`) as 1.08, so this is a backward-compatible refresh:
@@ -197,6 +199,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.2.0]: https://github.com/StackForge-EU/factur-x/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/StackForge-EU/factur-x/compare/v1.0.8...v1.1.0
 [1.0.8]: https://github.com/StackForge-EU/factur-x/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/StackForge-EU/factur-x/compare/v1.0.6...v1.0.7
