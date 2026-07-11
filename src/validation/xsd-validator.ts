@@ -131,6 +131,7 @@ export async function validateXsd(
     XsdValidator,
     XmlValidateError,
     xmlRegisterInputProvider,
+    xmlCleanupInputProvider,
     XmlBufferInputProvider,
   } = await import("libxml2-wasm");
 
@@ -144,6 +145,11 @@ export async function validateXsd(
     buffers[file] = buffers[filePath];
   }
 
+  // libxml2 keeps input providers in a fixed-size table (MAX_INPUT_CALLBACKS,
+  // currently 15).
+  // Clearing before every registration guarantees each call runs against its
+  // own buffer set.
+  xmlCleanupInputProvider();
   const provider = new XmlBufferInputProvider(buffers);
   xmlRegisterInputProvider(provider);
 
@@ -178,5 +184,8 @@ export async function validateXsd(
     xmlDoc?.dispose();
     validator?.dispose();
     xsdDoc?.dispose();
+    // Release the input-callback table slot registered above so repeated
+    // validations across a long-running process never exhaust it.
+    xmlCleanupInputProvider();
   }
 }

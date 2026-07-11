@@ -64,6 +64,22 @@ describe("validateXsd", () => {
     expect(result.errors).toHaveLength(0);
   });
 
+  it("validates a credit note referencing a dated preceding invoice (qdt:DateTimeString namespace)", async () => {
+    // Regression (issue #5): ram:FormattedIssueDateTime is typed as
+    // qdt:FormattedDateTimeType, so its child must be qdt:DateTimeString.
+    // Emitting udt:DateTimeString fails XSD validation for every credit note
+    // or cancellation invoice that references a preceding invoice with a date.
+    const xml = buildXml(
+      createBasicWlInput({
+        references: [{ id: "INV-PREV-001", type: "preceding", issueDate: "2025-05-01" }],
+      }),
+      Profile.BASIC_WL,
+    );
+    const result = await validateXsd(xml, Profile.BASIC_WL, { schemaBasePath });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
   it("rejects invalid XML", async () => {
     const xml = '<?xml version="1.0" encoding="UTF-8"?><invalid>not a CII document</invalid>';
     const result = await validateXsd(xml, Profile.MINIMUM, { schemaBasePath });
@@ -102,6 +118,33 @@ describe("validateXsd", () => {
     const result = await validateXsd(xml, Profile.EXTENDED, { schemaBasePath });
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
+  });
+
+  it("validates a profile after the input-callback table is saturated by others", async () => {
+    // Regression: libxml2 keeps input providers in a fixed-size table
+    // (MAX_INPUT_CALLBACKS = 15). validateXsd used to register a provider on
+    // every call without ever clearing it, so after 15 calls the table filled
+    // up and new registrations were silently dropped. Schema imports then
+    // resolved against whatever providers already sat in the table — none of
+    // which carried the current profile's schema files — so a later validation
+    // of an as-yet-unseen profile failed spuriously. Reproduce by saturating
+    // the table with 16 non-EXTENDED validations, then require EXTENDED (the
+    // largest schema, and the one issue #5 surfaced) to still validate.
+    for (let i = 0; i < 16; i++) {
+      const bwl = await validateXsd(
+        buildXml(createBasicWlInput(), Profile.BASIC_WL),
+        Profile.BASIC_WL,
+        { schemaBasePath },
+      );
+      expect(bwl.valid, `BASIC_WL warm-up validation #${i} should stay valid`).toBe(true);
+    }
+    const ext = await validateXsd(
+      buildXml(createExtendedInput(), Profile.EXTENDED),
+      Profile.EXTENDED,
+      { schemaBasePath },
+    );
+    expect(ext.valid, "EXTENDED must validate even after the callback table saturates").toBe(true);
+    expect(ext.errors).toHaveLength(0);
   });
 
   it("MINIMUM XML is invalid against EN16931 schema", async () => {

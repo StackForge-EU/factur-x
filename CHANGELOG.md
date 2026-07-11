@@ -41,6 +41,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
     logistic-service-charge exemption reasons) are still not emitted and can be
     added later without breaking changes.
 
+- **Fixed:** `ram:FormattedIssueDateTime` now emits a `qdt:DateTimeString` child
+  instead of `udt:DateTimeString`. It is typed as `qdt:FormattedDateTimeType` in
+  the CII XSD, so the previous `udt:` prefix failed XSD/Schematron validation for
+  every credit note or cancellation invoice referencing a dated preceding
+  invoice ([#5](https://github.com/StackForge-EU/factur-x/issues/5)).
+- **Fixed:** XSD validation no longer exhausts libxml2's fixed-size input-callback
+  table. `validateXsd` now clears the table on each call, so validating many
+  documents in one process no longer causes spurious failures once ~15
+  validations have run.
+
 ## [1.1.0] — 2026-05-27
 
 - **BREAKING:** Every `ram:GlobalID` and the legal-organization `ram:ID` now
