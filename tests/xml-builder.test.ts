@@ -419,6 +419,14 @@ describe("Edge cases", () => {
     expect(xml).toContain("PO-2025-500");
     expect(xml).toContain("InvoiceReferencedDocument");
     expect(xml).toContain("INV-PREV-001");
+    // ram:FormattedIssueDateTime is qdt:FormattedDateTimeType per the CII XSD, so
+    // its date child must be qdt:DateTimeString — not the unqualified udt: prefix.
+    expect(xml).toContain(
+      '<ram:FormattedIssueDateTime><qdt:DateTimeString format="102">20250501</qdt:DateTimeString></ram:FormattedIssueDateTime>',
+    );
+    expect(xml).not.toContain(
+      '<ram:FormattedIssueDateTime><udt:DateTimeString',
+    );
   });
 
   it("includes billing period", () => {

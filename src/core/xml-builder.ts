@@ -77,7 +77,12 @@ function tag(name: string, content: string, attrs?: Record<string, string>): str
 }
 
 function dateEl(wrapper: string, isoDate: string): string {
-  return tag(wrapper, tag("udt:DateTimeString", formatDate(isoDate), { format: "102" }));
+  // `ram:FormattedIssueDateTime` is typed as `qdt:FormattedDateTimeType` in the
+  // CII XSD, so its child must be `qdt:DateTimeString` — every other date wrapper
+  // (IssueDateTime, OccurrenceDateTime, DueDateDateTime, …) uses the unqualified
+  // `udt:DateTimeString`.
+  const child = wrapper === "ram:FormattedIssueDateTime" ? "qdt:DateTimeString" : "udt:DateTimeString";
+  return tag(wrapper, tag(child, formatDate(isoDate), { format: "102" }));
 }
 
 // ---------------------------------------------------------------------------
