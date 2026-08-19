@@ -1,4 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterAll } from "vitest";
+import * as fs from "node:fs";
+import * as os from "node:os";
 import * as path from "node:path";
 import { validateXsd } from "../src/validation/xsd-validator";
 import { buildXml } from "../src/core/xml-builder";
@@ -257,4 +259,47 @@ describe("validateXsd", () => {
       validateXsd("<xml/>", Profile.EN16931, { schemaBasePath: "/nonexistent/path" }),
     ).rejects.toThrow(/not found/i);
   });
+});
+
+describe("validateXsd schema resolution", () => {
+  // Regression: the XSD files are handed to libxml2 through an input provider,
+  // and libxml2 asks for them by the URL it resolved each `xsd:import` to.
+  // Keying that provider by a hand-built `file://` string broke every import
+  // whenever the install path did not survive the round-trip untouched — for
+  // any Windows install (backslashes, plus the `@` of `node_modules\@scope`),
+  // and on Linux/macOS for paths holding a space, `#` or a non-ASCII char.
+  const AWKWARD_SEGMENTS = [
+    "plain",
+    "My Projects", // spaces — common on macOS and Windows
+    "Jörg Müller", // non-ASCII
+    "with#hash",
+    "@scope", // every install lives under node_modules/@stackforge-eu
+    "short~1", // Windows 8.3 short name; pathToFileURL escapes `~` as %7E on Node >= 20
+  ];
+
+  const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), "facturx-schema-path-"));
+  afterAll(() => fs.rmSync(tmpRoot, { recursive: true, force: true }));
+
+  /** Copies the MINIMUM schema set below a directory named `segment`. */
+  function stageSchemaUnder(segment: string): string {
+    const base = path.join(tmpRoot, segment);
+    const source = path.join(schemaBasePath, "schema", "minimum");
+    const target = path.join(base, "schema", "minimum");
+    fs.mkdirSync(target, { recursive: true });
+    for (const file of fs.readdirSync(source).filter((f) => f.endsWith(".xsd"))) {
+      fs.copyFileSync(path.join(source, file), path.join(target, file));
+    }
+    return base;
+  }
+
+  for (const segment of AWKWARD_SEGMENTS) {
+    it(`resolves xsd:import from a schema path containing "${segment}"`, async () => {
+      const xml = buildXml(createMinimumInput(), Profile.MINIMUM);
+      const result = await validateXsd(xml, Profile.MINIMUM, {
+        schemaBasePath: stageSchemaUnder(segment),
+      });
+      expect(result.errors).toEqual([]);
+      expect(result.valid).toBe(true);
+    });
+  }
 });

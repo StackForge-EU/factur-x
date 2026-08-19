@@ -36,9 +36,13 @@ jobs:
       - run: npm run lint
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
+        # Windows is covered too: schema resolution is path-shaped, and a
+        # POSIX-only matrix cannot catch backslash/percent-encoding bugs.
+        os: [ubuntu-latest, windows-latest]
         node-version: [18, 20, 22, 24]
     steps:
       - uses: actions/checkout@v4
