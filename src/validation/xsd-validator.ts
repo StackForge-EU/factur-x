@@ -132,26 +132,57 @@ export async function validateXsd(
     XmlValidateError,
     xmlRegisterInputProvider,
     xmlCleanupInputProvider,
-    XmlBufferInputProvider,
+    openBuffer,
+    readBuffer,
+    closeBuffer,
   } = await import("libxml2-wasm");
 
   const schemaDir = path.dirname(xsdPath);
   const files = fs.readdirSync(schemaDir).filter((f) => f.endsWith(".xsd"));
   const buffers: Record<string, Uint8Array> = {};
   for (const file of files) {
-    const filePath = path.join(schemaDir, file);
-    buffers[filePath] = fs.readFileSync(filePath);
-    buffers[pathToFileURL(filePath).href] = buffers[filePath];
-    buffers[file] = buffers[filePath];
+    buffers[file] = fs.readFileSync(path.join(schemaDir, file));
   }
+
+  /**
+   * Maps a URL libxml2 asks for onto one of the profile's schema files.
+   *
+   * libxml2 resolves the relative `xsd:import` declarations against the base
+   * URL of the main XSD, so it always asks for absolute URLs.  Comparing those
+   * against pre-built keys is brittle: `pathToFileURL()` escapes `~` as `%7E`
+   * (Node >= 20) while libxml2 normalises it back, and a Windows path fed
+   * through plain string concatenation is not a well-formed URL at all.
+   *
+   * Every schema file of a profile is a sibling in one directory, so the
+   * basename identifies it unambiguously — and matching on it is immune to
+   * both platform separators and percent-encoding.
+   */
+  const schemaFileFor = (requested: string): string | undefined => {
+    const start = Math.max(requested.lastIndexOf("/"), requested.lastIndexOf("\\")) + 1;
+    const segment = requested.slice(start);
+    let name = segment;
+    try {
+      name = decodeURIComponent(segment);
+    } catch {
+      // Not valid percent-encoding — match the raw segment instead.
+    }
+    return files.includes(name) ? name : undefined;
+  };
 
   // libxml2 keeps input providers in a fixed-size table (MAX_INPUT_CALLBACKS,
   // currently 15).
   // Clearing before every registration guarantees each call runs against its
   // own buffer set.
   xmlCleanupInputProvider();
-  const provider = new XmlBufferInputProvider(buffers);
-  xmlRegisterInputProvider(provider);
+  xmlRegisterInputProvider({
+    match: (filename) => schemaFileFor(filename) !== undefined,
+    open: (filename) => openBuffer(buffers[schemaFileFor(filename)!]),
+    read: readBuffer,
+    close: (fd) => {
+      closeBuffer(fd);
+      return true;
+    },
+  });
 
   let xsdDoc;
   let validator;
