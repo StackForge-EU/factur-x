@@ -15,7 +15,7 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { Profile } from "../flavors/constants";
 import { PROFILE_SCHEMA_DIRS, PROFILE_MAIN_XSD } from "../flavors/constants";
 
@@ -141,7 +141,7 @@ export async function validateXsd(
   for (const file of files) {
     const filePath = path.join(schemaDir, file);
     buffers[filePath] = fs.readFileSync(filePath);
-    buffers[`file://${filePath}`] = buffers[filePath];
+    buffers[pathToFileURL(filePath).href] = buffers[filePath];
     buffers[file] = buffers[filePath];
   }
 
@@ -158,7 +158,7 @@ export async function validateXsd(
   let xmlDoc;
   try {
     const xsdContent = fs.readFileSync(xsdPath, "utf-8");
-    xsdDoc = XmlDocument.fromString(xsdContent, { url: `file://${xsdPath}` });
+    xsdDoc = XmlDocument.fromString(xsdContent, { url: pathToFileURL(xsdPath).href });
     validator = XsdValidator.fromDoc(xsdDoc);
 
     xmlDoc = XmlDocument.fromString(xml);
