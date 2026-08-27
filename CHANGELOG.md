@@ -9,8 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [1.2.1] — 2026-08-27
 
+- **Fixed XSD validation on Windows.** Schema `<xsd:import>` resolution built a
+  malformed `file://` URL from backslash paths and keyed the schema lookup by
+  a percent-encoded href that libxml2 normalises differently. Now uses
+  `pathToFileURL()` and matches imported schemas by filename. Windows added
+  to the CI matrix (thanks @muratkorkmaztr-cmyk, #6).
+- **Embedded `factur-x.xml` now uses the `application/xml` MIME type** instead
+  of the deprecated `text/xml` (RFC 7303), which current Factur-X conformance
+  checkers flag (thanks @muratkorkmaztr-cmyk, #7).
 - Expanded npm `keywords` (e.g. `e-rechnung`, `pdfa`, `chorus-pro`, `un-cefact`,
-  spelling variants) so the package is easier to find on npm. No code changes.
+  spelling variants) so the package is easier to find on npm (#8).
 
 ## [1.2.0] — 2026-07-11
 
