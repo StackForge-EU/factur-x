@@ -1,0 +1,4 @@
+# Bundled Factur-X XSD/Schematron/XSLT artefacts are third-party standards
+# files, not project code. Keep GitHub's language stats (and the badges that
+# read them) pointing at the TypeScript library.
+schema/** linguist-vendored
