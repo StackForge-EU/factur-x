@@ -3,6 +3,7 @@ name: PR Check
 on:
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 
 concurrency:
   group: pr-${{ github.event.pull_request.number }}
@@ -88,14 +89,42 @@ jobs:
       - name: Deno compatibility tests
         run: deno test --allow-read --allow-env --allow-ffi --unstable-sloppy-imports tests/deno_compat_test.ts
 
+  # Turns the "CHANGELOG.md updated" checkbox in the PR template into a real
+  # check. release.yml builds release notes from [Unreleased], so anything that
+  # merges without an entry silently drops out of the notes. Housekeeping PRs
+  # can opt out with the skip-changelog label.
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Require a CHANGELOG.md entry (or the skip-changelog label)
+        env:
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [[ ",${LABELS}," == *",skip-changelog,"* ]]; then
+            echo "skip-changelog label set — skipping."
+            exit 0
+          fi
+          if git diff --name-only "${BASE}...${HEAD}" | grep -qx "CHANGELOG.md"; then
+            echo "CHANGELOG.md updated."
+            exit 0
+          fi
+          echo "::error::No CHANGELOG.md entry. Add one under '## [Unreleased]', or apply the 'skip-changelog' label if this change is not user-facing."
+          exit 1
+
   pr-check:
     if: always()
-    needs: [validate, lint, format, test, deno]
+    needs: [validate, lint, format, changelog, test, deno]
     runs-on: ubuntu-latest
     steps:
       - name: Verify all checks passed
         run: |
-          if [[ "${{ needs.validate.result }}" != "success" || "${{ needs.lint.result }}" != "success" || "${{ needs.format.result }}" != "success" || "${{ needs.test.result }}" != "success" || "${{ needs.deno.result }}" != "success" ]]; then
-            echo "::error::One or more checks failed: validate=${{ needs.validate.result }}, lint=${{ needs.lint.result }}, format=${{ needs.format.result }}, test=${{ needs.test.result }}, deno=${{ needs.deno.result }}"
+          if [[ "${{ needs.validate.result }}" != "success" || "${{ needs.lint.result }}" != "success" || "${{ needs.format.result }}" != "success" || "${{ needs.changelog.result }}" != "success" || "${{ needs.test.result }}" != "success" || "${{ needs.deno.result }}" != "success" ]]; then
+            echo "::error::One or more checks failed: validate=${{ needs.validate.result }}, lint=${{ needs.lint.result }}, format=${{ needs.format.result }}, changelog=${{ needs.changelog.result }}, test=${{ needs.test.result }}, deno=${{ needs.deno.result }}"
             exit 1
           fi
