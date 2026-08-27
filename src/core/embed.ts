@@ -168,7 +168,9 @@ function ensureIdTrailer(pdfDoc: PDFDocument, pdfContentBytes: Uint8Array): void
   const existingIdTrailer = pdfDoc.context.trailerInfo.ID;
   // MD5 is the algorithm recommended by PDF 1.7 §14.4 for the trailer file
   // identifier — uniqueness is what matters here, not cryptographic strength.
-  const currentContentHash = PDFHexString.of(createHash("md5").update(pdfContentBytes).digest("hex"));
+  const currentContentHash = PDFHexString.of(
+    createHash("md5").update(pdfContentBytes).digest("hex"),
+  );
 
   const hasValidIdTrailer = existingIdTrailer instanceof PDFArray && existingIdTrailer.size() === 2;
 
@@ -187,11 +189,7 @@ function ensureIdTrailer(pdfDoc: PDFDocument, pdfContentBytes: Uint8Array): void
  * Per ISO 19005-3 §6.2.4 a PDF/A document that uses DeviceRGB must declare
  * a destination profile via an OutputIntent of subtype `GTS_PDFA1`.
  */
-function ensureOutputIntent(
-  pdfDoc: PDFDocument,
-  iccBytes: Uint8Array,
-  identifier: string,
-): void {
+function ensureOutputIntent(pdfDoc: PDFDocument, iccBytes: Uint8Array, identifier: string): void {
   const existing = pdfDoc.catalog.lookup(PDFName.of("OutputIntents"));
   if (existing instanceof PDFArray && existing.size() > 0) return;
 
@@ -221,11 +219,7 @@ function ensureOutputIntent(
 function findUnembeddedFonts(pdfDoc: PDFDocument): string[] {
   const seen = new Set<PDFRef>();
   const unembedded = new Set<string>();
-  const FONT_FILE_KEYS = [
-    PDFName.of("FontFile"),
-    PDFName.of("FontFile2"),
-    PDFName.of("FontFile3"),
-  ];
+  const FONT_FILE_KEYS = [PDFName.of("FontFile"), PDFName.of("FontFile2"), PDFName.of("FontFile3")];
 
   const inspectFontDict = (font: PDFDict): void => {
     const subtype = font.lookup(PDFName.of("Subtype"));

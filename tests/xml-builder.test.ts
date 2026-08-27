@@ -238,10 +238,10 @@ describe("BASIC profile", () => {
     delete inp.billingPeriod;
     const x = buildXml(inp, Profile.BASIC);
     expect(x).not.toContain("<ram:ApplicableHeaderTradeDelivery/>");
-    expect(x).not.toContain("<ram:ApplicableHeaderTradeDelivery></ram:ApplicableHeaderTradeDelivery>");
-    expect(x).toMatch(
-      /<ram:ApplicableHeaderTradeDelivery>\s*<ram:ActualDeliverySupplyChainEvent>/,
+    expect(x).not.toContain(
+      "<ram:ApplicableHeaderTradeDelivery></ram:ApplicableHeaderTradeDelivery>",
     );
+    expect(x).toMatch(/<ram:ApplicableHeaderTradeDelivery>\s*<ram:ActualDeliverySupplyChainEvent>/);
   });
 
   it("falls back to ActualDeliveryEvent even when billingPeriod is set (BR-FX-EN-04 second conjunct)", () => {
@@ -252,9 +252,7 @@ describe("BASIC profile", () => {
     // billingPeriod alone satisfies the first conjunct of BR-FX-EN-04 but the
     // second requires ApplicableHeaderTradeDelivery to be non-empty.
     expect(x).not.toContain("<ram:ApplicableHeaderTradeDelivery/>");
-    expect(x).toMatch(
-      /<ram:ApplicableHeaderTradeDelivery>\s*<ram:ActualDeliverySupplyChainEvent>/,
-    );
+    expect(x).toMatch(/<ram:ApplicableHeaderTradeDelivery>\s*<ram:ActualDeliverySupplyChainEvent>/);
     expect(x).toContain("<ram:BillingSpecifiedPeriod>");
   });
 
@@ -402,8 +400,12 @@ describe("Edge cases", () => {
     // BR-S-08 / BR-CO-11: ChargeIndicator's inner Indicator must be in the udt
     // namespace, not ram. With the wrong namespace XSD rejects the file and
     // every schematron query on allowances/charges silently returns nothing.
-    expect(xml).toContain("<ram:ChargeIndicator><udt:Indicator>false</udt:Indicator></ram:ChargeIndicator>");
-    expect(xml).toContain("<ram:ChargeIndicator><udt:Indicator>true</udt:Indicator></ram:ChargeIndicator>");
+    expect(xml).toContain(
+      "<ram:ChargeIndicator><udt:Indicator>false</udt:Indicator></ram:ChargeIndicator>",
+    );
+    expect(xml).toContain(
+      "<ram:ChargeIndicator><udt:Indicator>true</udt:Indicator></ram:ChargeIndicator>",
+    );
     expect(xml).not.toMatch(/<ram:ChargeIndicator>\s*<ram:Indicator>/);
   });
 
@@ -424,9 +426,7 @@ describe("Edge cases", () => {
     expect(xml).toContain(
       '<ram:FormattedIssueDateTime><qdt:DateTimeString format="102">20250501</qdt:DateTimeString></ram:FormattedIssueDateTime>',
     );
-    expect(xml).not.toContain(
-      '<ram:FormattedIssueDateTime><udt:DateTimeString',
-    );
+    expect(xml).not.toContain("<ram:FormattedIssueDateTime><udt:DateTimeString");
   });
 
   it("includes billing period", () => {

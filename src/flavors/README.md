@@ -4,12 +4,12 @@ Flavors adapt Factur-X output for different countries and platforms.
 
 ## Supported Flavors
 
-| Flavor         | Region      | Notes                                       |
-| -------------- | ----------- | ------------------------------------------- |
-| **factur-x**   | France / EU | Default; Factur-X 1.09                      |
+| Flavor         | Region      | Notes                                      |
+| -------------- | ----------- | ------------------------------------------ |
+| **factur-x**   | France / EU | Default; Factur-X 1.09                     |
 | **zugferd**    | Germany     | ZUGFeRD 2.5 = Factur-X 1.09 (same schemas) |
-| **xrechnung**  | Germany B2G | Pure CII XML for government portals         |
-| **chrono-pro** | Belgium     | Chrono Pro platform conventions              |
+| **xrechnung**  | Germany B2G | Pure CII XML for government portals        |
+| **chrono-pro** | Belgium     | Chrono Pro platform conventions            |
 
 ## Differences
 

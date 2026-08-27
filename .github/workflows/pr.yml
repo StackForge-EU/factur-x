@@ -35,6 +35,19 @@ jobs:
       - run: npm ci
       - run: npm run lint
 
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run format
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -77,12 +90,12 @@ jobs:
 
   pr-check:
     if: always()
-    needs: [validate, lint, test, deno]
+    needs: [validate, lint, format, test, deno]
     runs-on: ubuntu-latest
     steps:
       - name: Verify all checks passed
         run: |
-          if [[ "${{ needs.validate.result }}" != "success" || "${{ needs.lint.result }}" != "success" || "${{ needs.test.result }}" != "success" || "${{ needs.deno.result }}" != "success" ]]; then
-            echo "::error::One or more checks failed: validate=${{ needs.validate.result }}, lint=${{ needs.lint.result }}, test=${{ needs.test.result }}, deno=${{ needs.deno.result }}"
+          if [[ "${{ needs.validate.result }}" != "success" || "${{ needs.lint.result }}" != "success" || "${{ needs.format.result }}" != "success" || "${{ needs.test.result }}" != "success" || "${{ needs.deno.result }}" != "success" ]]; then
+            echo "::error::One or more checks failed: validate=${{ needs.validate.result }}, lint=${{ needs.lint.result }}, format=${{ needs.format.result }}, test=${{ needs.test.result }}, deno=${{ needs.deno.result }}"
             exit 1
           fi

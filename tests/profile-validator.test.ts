@@ -600,7 +600,14 @@ describe("BR-27 negative line price", () => {
     const base = createBasicInput();
     const input = createBasicInput({
       lines: [{ ...base.lines![0], unitPrice: 0 }],
-      totals: { ...base.totals!, lineTotal: 0, taxBasisTotal: 0, taxTotal: 0, grandTotal: 0, duePayableAmount: 0 },
+      totals: {
+        ...base.totals!,
+        lineTotal: 0,
+        taxBasisTotal: 0,
+        taxTotal: 0,
+        grandTotal: 0,
+        duePayableAmount: 0,
+      },
       vatBreakdown: [{ ...base.vatBreakdown![0], taxableAmount: 0, taxAmount: 0 }],
     });
     const result = validateInput(input, Profile.BASIC);
@@ -683,7 +690,12 @@ describe("BR-CO-17 vat amount = round(basis × rate / 100)", () => {
       vatBreakdown: [
         { categoryCode: "S", ratePercent: 19, taxableAmount: 100, taxAmount: 0 }, // wrong: should be 19
       ],
-      totals: { ...createBasicInput().totals!, taxTotal: 0, grandTotal: 100, duePayableAmount: 100 },
+      totals: {
+        ...createBasicInput().totals!,
+        taxTotal: 0,
+        grandTotal: 100,
+        duePayableAmount: 100,
+      },
     });
     const result = validateInput(input, Profile.BASIC);
     expect(result.valid).toBe(false);

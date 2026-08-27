@@ -440,7 +440,10 @@ export function validateInput(
     }
 
     // BR-DE-2: Seller contact group (BG-6) must be provided.
-    if (!input.seller?.contact || (!input.seller.contact.name && !input.seller.contact.email && !input.seller.contact.phone)) {
+    if (
+      !input.seller?.contact ||
+      (!input.seller.contact.name && !input.seller.contact.email && !input.seller.contact.phone)
+    ) {
       addError(
         errors,
         "seller.contact",

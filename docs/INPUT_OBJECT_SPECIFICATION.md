@@ -210,7 +210,14 @@ const input: FacturXInvoiceInput = {
     duePayableAmount: 2082.5,
     currency: "EUR",
   },
-  vatBreakdown: [{ categoryCode: VatCategoryCode.STANDARD_RATE, ratePercent: 19, taxableAmount: 1750, taxAmount: 332.5 }],
+  vatBreakdown: [
+    {
+      categoryCode: VatCategoryCode.STANDARD_RATE,
+      ratePercent: 19,
+      taxableAmount: 1750,
+      taxAmount: 332.5,
+    },
+  ],
   payment: {
     meansCode: "58",
     iban: "DE89370400440532013000",

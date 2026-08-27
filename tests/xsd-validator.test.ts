@@ -38,8 +38,20 @@ describe("validateXsd", () => {
     const xml = buildXml(
       createBasicWlInput({
         allowancesCharges: [
-          { isCharge: false, amount: 50, reason: "Coupon", vatCategoryCode: "S", vatRatePercent: 19 },
-          { isCharge: true, amount: 10, reason: "Shipping", vatCategoryCode: "S", vatRatePercent: 19 },
+          {
+            isCharge: false,
+            amount: 50,
+            reason: "Coupon",
+            vatCategoryCode: "S",
+            vatRatePercent: 19,
+          },
+          {
+            isCharge: true,
+            amount: 10,
+            reason: "Shipping",
+            vatCategoryCode: "S",
+            vatRatePercent: 19,
+          },
         ],
         totals: {
           lineTotal: 1000,
