@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- CI now requires every PR to add a `CHANGELOG.md` entry (or carry the
+  `skip-changelog` label), so contributor fixes always reach the release notes.
+
 ## [1.2.1] — 2026-08-27
 
 - **Fixed XSD validation on Windows.** Schema `<xsd:import>` resolution built a
