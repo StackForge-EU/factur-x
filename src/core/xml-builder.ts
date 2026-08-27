@@ -81,7 +81,8 @@ function dateEl(wrapper: string, isoDate: string): string {
   // CII XSD, so its child must be `qdt:DateTimeString` — every other date wrapper
   // (IssueDateTime, OccurrenceDateTime, DueDateDateTime, …) uses the unqualified
   // `udt:DateTimeString`.
-  const child = wrapper === "ram:FormattedIssueDateTime" ? "qdt:DateTimeString" : "udt:DateTimeString";
+  const child =
+    wrapper === "ram:FormattedIssueDateTime" ? "qdt:DateTimeString" : "udt:DateTimeString";
   return tag(wrapper, tag(child, formatDate(isoDate), { format: "102" }));
 }
 
@@ -363,10 +364,7 @@ export function buildXml(input: FacturXInvoiceInput, profile: Profile, flavor?: 
   // not the underlying EN 16931 URN. For all other flavors keep the
   // profile-specific URN from the codedb.
   const profileUrn = fl === Flavor.XRECHNUNG ? XRECHNUNG_PROFILE_URN : PROFILE_URNS[profile];
-  ctx += tag(
-    "ram:GuidelineSpecifiedDocumentContextParameter",
-    tag("ram:ID", profileUrn),
-  );
+  ctx += tag("ram:GuidelineSpecifiedDocumentContextParameter", tag("ram:ID", profileUrn));
 
   // ── ExchangedDocument ────────────────────────────────────────────────
   let edoc = tag("ram:ID", escapeXml(doc.id));
