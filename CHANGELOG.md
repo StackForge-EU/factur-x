@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- Expanded npm `keywords` (e.g. `e-rechnung`, `pdfa`, `chorus-pro`, `un-cefact`,
+  spelling variants) so the package is easier to find on npm. No code changes.
+
 ## [1.2.0] — 2026-07-11
 
 - **Updated to Factur-X 1.09 / ZUGFeRD 2.5** (spec dated 2026-06-10). Factur-X
@@ -70,12 +73,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
     `ram:GlobalID` had the same defect as the party one)
   - `LegalOrganizationInput.schemeID?: string` added (optional, mirrors the
     conditional spec rule)
-  Migration: `globalId: "4000001000005"` →
-  `globalId: { value: "4000001000005", schemeID: "0088" }` (and the analogous
-  rewrite for `standardIdentifier`). The new `IdentifierWithSchemeInput` type
-  is exported from `src/index.ts`. Regression test added in
-  `tests/xsd-validator.test.ts` that drives all three schemed identifiers
-  through the EN16931 XSD in one go (thanks @sco-indy, #4).
+    Migration: `globalId: "4000001000005"` →
+    `globalId: { value: "4000001000005", schemeID: "0088" }` (and the analogous
+    rewrite for `standardIdentifier`). The new `IdentifierWithSchemeInput` type
+    is exported from `src/index.ts`. Regression test added in
+    `tests/xsd-validator.test.ts` that drives all three schemed identifiers
+    through the EN16931 XSD in one go (thanks @sco-indy, #4).
 
 ## [1.0.8] — 2026-05-27
 
@@ -122,7 +125,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   debtor account last. Any invoice combining a SEPA direct debit
   (`payment.meansCode = "59"`) with `payment.debtorIban` plus a payee
   IBAN/BIC failed XSD validation with `Element 'PayerPartyDebtorFinancialAccount':
-  This element is not expected`. Reordered the three blocks in
+This element is not expected`. Reordered the three blocks in
   `src/core/xml-builder.ts`; regression test added in
   `tests/xml-builder.test.ts`.
 
