@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.1] — 2026-08-27
+
 - Expanded npm `keywords` (e.g. `e-rechnung`, `pdfa`, `chorus-pro`, `un-cefact`,
   spelling variants) so the package is easier to find on npm. No code changes.
 
@@ -202,6 +204,7 @@ This element is not expected`. Reordered the three blocks in
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.2.1]: https://github.com/StackForge-EU/factur-x/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/StackForge-EU/factur-x/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/StackForge-EU/factur-x/compare/v1.0.8...v1.1.0
 [1.0.8]: https://github.com/StackForge-EU/factur-x/compare/v1.0.7...v1.0.8
