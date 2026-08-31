@@ -196,14 +196,25 @@ function buildLineItem(line: InvoiceLineInput, profile: Profile): string {
       "ram:BuyerOrderReferencedDocument",
       tag("ram:LineID", escapeXml(line.buyerOrderLineId)),
     );
+  // BT-149/BT-150: BasisQuantity must follow ChargeAmount in TradePriceType.
+  // BT-150 defaults to the line's unit (EN 16931 requires it to equal BT-130).
+  const unitCode = line.unitCode ?? UnitCode.UNIT;
+  const basisQuantity =
+    line.basisQuantity !== undefined
+      ? tag("ram:BasisQuantity", line.basisQuantity.toString(), {
+          unitCode: line.basisQuantityUnitCode ?? unitCode,
+        })
+      : "";
   if (line.grossUnitPrice !== undefined)
     agree += tag(
       "ram:GrossPriceProductTradePrice",
-      tag("ram:ChargeAmount", fmtAmt(line.grossUnitPrice)),
+      tag("ram:ChargeAmount", fmtAmt(line.grossUnitPrice)) + basisQuantity,
     );
-  agree += tag("ram:NetPriceProductTradePrice", tag("ram:ChargeAmount", fmtAmt(line.unitPrice)));
+  agree += tag(
+    "ram:NetPriceProductTradePrice",
+    tag("ram:ChargeAmount", fmtAmt(line.unitPrice)) + basisQuantity,
+  );
 
-  const unitCode = line.unitCode ?? UnitCode.UNIT;
   const delivery = tag("ram:BilledQuantity", line.quantity.toString(), {
     unitCode,
   });

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **Added item price base quantity (BT-149/BT-150).** New optional
+  `basisQuantity` and `basisQuantityUnitCode` fields on `InvoiceLineInput`
+  emit `ram:BasisQuantity` inside the net (and, when present, gross) price
+  element, so a unit price can state the quantity it refers to — e.g.
+  `12.50` per 10 m². The unit code defaults to the line's `unitCode`, as
+  EN 16931 requires BT-150 to match BT-130. Omitting the field keeps the
+  output byte-for-byte identical (#12).
 - CI now requires every PR to add a `CHANGELOG.md` entry (or carry the
   `skip-changelog` label), so contributor fixes always reach the release notes.
 

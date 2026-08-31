@@ -726,6 +726,22 @@ export interface InvoiceLineInput {
   grossUnitPrice?: number;
 
   /**
+   * Item price base quantity — the quantity the unit price (BT-146)
+   * applies to, e.g. a price per 10 square metres or per 1000 prints.
+   * @see EN 16931 BT-149
+   */
+  basisQuantity?: number;
+
+  /**
+   * Unit of measure for `basisQuantity` (UN/CEFACT Rec 20).
+   *
+   * @default the line's `unitCode` when omitted, as EN 16931 requires
+   *   BT-150 to match the invoiced quantity's unit (BT-130)
+   * @see EN 16931 BT-150
+   */
+  basisQuantityUnitCode?: UnitCode | (string & Record<never, never>);
+
+  /**
    * Line total (net) — can be derived from `quantity * unitPrice`.
    * @see EN 16931 BT-131
    */
