@@ -318,6 +318,41 @@ describe("EXTENDED profile", () => {
   });
 });
 
+describe("Item price base quantity (BT-149/BT-150)", () => {
+  it("emits BasisQuantity with explicit unit code", () => {
+    const input = createEn16931Input();
+    input.lines[0] = {
+      ...input.lines[0],
+      basisQuantity: 10,
+      basisQuantityUnitCode: "MTK",
+    };
+    const xml = buildXml(input, Profile.EN16931);
+    expect(xml).toContain(
+      '<ram:ChargeAmount>150.00</ram:ChargeAmount><ram:BasisQuantity unitCode="MTK">10</ram:BasisQuantity>',
+    );
+  });
+
+  it("defaults the unit code to the line's unitCode", () => {
+    const input = createEn16931Input();
+    input.lines[0] = { ...input.lines[0], basisQuantity: 1000 };
+    const xml = buildXml(input, Profile.EN16931);
+    expect(xml).toContain('<ram:BasisQuantity unitCode="HUR">1000</ram:BasisQuantity>');
+  });
+
+  it("emits BasisQuantity in both gross and net price when grossUnitPrice is set", () => {
+    const input = createEn16931Input();
+    input.lines[0] = { ...input.lines[0], grossUnitPrice: 160, basisQuantity: 10 };
+    const xml = buildXml(input, Profile.EN16931);
+    const matches = xml.match(/<ram:BasisQuantity unitCode="HUR">10<\/ram:BasisQuantity>/g);
+    expect(matches).toHaveLength(2);
+  });
+
+  it("omits BasisQuantity when not provided (output unchanged)", () => {
+    const xml = buildXml(createEn16931Input(), Profile.EN16931);
+    expect(xml).not.toContain("BasisQuantity");
+  });
+});
+
 describe("Edge cases", () => {
   it("escapes XML special characters in seller name", () => {
     const input = createMinimumInput({
