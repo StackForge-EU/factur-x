@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **Dropped the unused `schema/cii-d22b/` code-list XSDs from the npm and JSR
+  packages** (~100 files, ~800 KB). Nothing references them at runtime — the
+  per-profile schema directories are self-contained. One of these files also
+  has a path longer than 100 characters, which a JSR server-side tar
+  regression truncated, breaking the 1.3.0 JSR publish.
+- The release workflow now dry-runs `npm pack` and `deno publish` before
+  tagging, and publishes to npm only after JSR has succeeded — npm versions
+  are effectively immutable, so the unretractable registry ships last.
+
 ## [1.3.0] — 2026-09-01
 
 - **Added item price base quantity (BT-149/BT-150).** New optional

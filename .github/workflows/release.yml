@@ -64,6 +64,18 @@ jobs:
           ${{ steps.version.outputs.old }}
           "${{ github.server_url }}/${{ github.repository }}"
 
+      # Package both registries' tarballs without uploading, so a broken
+      # manifest aborts the release before anything is tagged or published.
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Dry-run npm pack
+        run: npm pack --dry-run
+
+      - name: Dry-run JSR publish
+        run: deno publish --dry-run --allow-dirty
+
       - name: Commit, tag, push
         run: |
           git config user.name "github-actions[bot]"
@@ -80,8 +92,10 @@ jobs:
           name: v${{ steps.version.outputs.new }}
           body_path: RELEASE_NOTES.md
 
+  # Runs after publish-jsr: npm versions are effectively immutable, so the
+  # registry we cannot retract from publishes only once JSR has succeeded.
   publish-npm:
-    needs: release
+    needs: [release, publish-jsr]
     runs-on: ubuntu-latest
     permissions:
       contents: read

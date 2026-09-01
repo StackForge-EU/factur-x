@@ -64,6 +64,7 @@
   "files": [
     "dist",
     "schema/**/*.xsd",
+    "!schema/cii-d22b",
     "schema/README.md",
     "README.md",
     "LICENSE",
