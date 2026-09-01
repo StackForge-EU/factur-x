@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.1] — 2026-09-01
+
 - **Dropped the unused `schema/cii-d22b/` code-list XSDs from the npm and JSR
   packages** (~100 files, ~800 KB). Nothing references them at runtime — the
   per-profile schema directories are self-contained. One of these files also
@@ -233,6 +235,7 @@ This element is not expected`. Reordered the three blocks in
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.3.1]: https://github.com/StackForge-EU/factur-x/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/StackForge-EU/factur-x/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/StackForge-EU/factur-x/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/StackForge-EU/factur-x/compare/v1.1.0...v1.2.0
