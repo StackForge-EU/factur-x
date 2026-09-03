@@ -94,6 +94,23 @@ describe("validateXsd", () => {
     expect(result.errors).toHaveLength(0);
   });
 
+  it("validates EN16931 XML with a price discount after a basis quantity (BT-147 element order)", async () => {
+    // AppliedTradeAllowanceCharge must come last in TradePriceType, after
+    // ChargeAmount and BasisQuantity (issue #15) — inserting it before the
+    // basis quantity fails XSD validation.
+    const input = createEn16931Input();
+    input.lines[0] = {
+      ...input.lines[0],
+      grossUnitPrice: 160,
+      basisQuantity: 10,
+      priceDiscount: 10,
+    };
+    const xml = buildXml(input, Profile.EN16931);
+    const result = await validateXsd(xml, Profile.EN16931, { schemaBasePath });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
   it("validates a credit note referencing a dated preceding invoice (qdt:DateTimeString namespace)", async () => {
     // Regression (issue #5): ram:FormattedIssueDateTime is typed as
     // qdt:FormattedDateTimeType, so its child must be qdt:DateTimeString.

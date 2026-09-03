@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **Added the item price discount (BT-147).** A new optional `priceDiscount`
+  field on `InvoiceLineInput` emits `ram:AppliedTradeAllowanceCharge` inside
+  the gross price element, so a line can state the discount that connects the
+  gross unit price (BT-148) to the net unit price (BT-146) instead of leaving
+  it implied by their difference. Requires `grossUnitPrice` to be set; the
+  amount keeps up to four decimals for sub-cent discounts. Omitting the field
+  keeps the output byte-for-byte identical (#15).
+
 ## [1.3.1] — 2026-09-01
 
 - **Dropped the unused `schema/cii-d22b/` code-list XSDs from the npm and JSR

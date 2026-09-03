@@ -726,6 +726,15 @@ export interface InvoiceLineInput {
   grossUnitPrice?: number;
 
   /**
+   * Item price discount — the amount subtracted from `grossUnitPrice`
+   * (BT-148) to arrive at `unitPrice` (BT-146). Emitted as
+   * `ram:AppliedTradeAllowanceCharge` inside the gross price element,
+   * so `grossUnitPrice` must be set alongside it.
+   * @see EN 16931 BT-147
+   */
+  priceDiscount?: number;
+
+  /**
    * Item price base quantity — the quantity the unit price (BT-146)
    * applies to, e.g. a price per 10 square metres or per 1000 prints.
    * @see EN 16931 BT-149
