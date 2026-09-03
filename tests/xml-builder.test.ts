@@ -353,6 +353,55 @@ describe("Item price base quantity (BT-149/BT-150)", () => {
   });
 });
 
+describe("Item price discount (BT-147)", () => {
+  it("emits AppliedTradeAllowanceCharge inside the gross price element", () => {
+    const input = createEn16931Input();
+    input.lines[0] = { ...input.lines[0], grossUnitPrice: 160, priceDiscount: 10 };
+    const xml = buildXml(input, Profile.EN16931);
+    expect(xml).toContain(
+      "<ram:GrossPriceProductTradePrice><ram:ChargeAmount>160.00</ram:ChargeAmount>" +
+        "<ram:AppliedTradeAllowanceCharge>" +
+        "<ram:ChargeIndicator><udt:Indicator>false</udt:Indicator></ram:ChargeIndicator>" +
+        "<ram:ActualAmount>10.00</ram:ActualAmount>" +
+        "</ram:AppliedTradeAllowanceCharge></ram:GrossPriceProductTradePrice>",
+    );
+  });
+
+  it("places the discount after BasisQuantity when both are set (XSD element order)", () => {
+    const input = createEn16931Input();
+    input.lines[0] = {
+      ...input.lines[0],
+      grossUnitPrice: 160,
+      basisQuantity: 10,
+      priceDiscount: 10,
+    };
+    const xml = buildXml(input, Profile.EN16931);
+    expect(xml).toContain(
+      '<ram:BasisQuantity unitCode="HUR">10</ram:BasisQuantity><ram:AppliedTradeAllowanceCharge>',
+    );
+  });
+
+  it("keeps sub-cent discount precision (up to four decimals)", () => {
+    const input = createEn16931Input();
+    input.lines[0] = { ...input.lines[0], grossUnitPrice: 0.25, priceDiscount: 0.025 };
+    const xml = buildXml(input, Profile.EN16931);
+    expect(xml).toContain("<ram:ActualAmount>0.025</ram:ActualAmount>");
+  });
+
+  it("throws when priceDiscount is set without grossUnitPrice", () => {
+    const input = createEn16931Input();
+    input.lines[0] = { ...input.lines[0], priceDiscount: 10 };
+    expect(() => buildXml(input, Profile.EN16931)).toThrow(/BT-148/);
+  });
+
+  it("omits AppliedTradeAllowanceCharge when not provided (output unchanged)", () => {
+    const input = createEn16931Input();
+    input.lines[0] = { ...input.lines[0], grossUnitPrice: 160 };
+    const xml = buildXml(input, Profile.EN16931);
+    expect(xml).not.toContain("AppliedTradeAllowanceCharge");
+  });
+});
+
 describe("Edge cases", () => {
   it("escapes XML special characters in seller name", () => {
     const input = createMinimumInput({

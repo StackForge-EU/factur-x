@@ -75,21 +75,24 @@ interface FacturXInvoiceInput {
 
 ### InvoiceLineInput
 
-| Field                | Type                         | BT     | BASIC | EN 16931 |
-| -------------------- | ---------------------------- | ------ | :---: | :------: |
-| `id`                 | `string`                     | BT-126 |  ✅   |    ✅    |
-| `name`               | `string`                     | BT-153 |  ✅   |    ✅    |
-| `quantity`           | `number`                     | BT-129 |  ✅   |    ✅    |
-| `unitCode`           | `string?`                    | BT-130 |  ✅   |    ✅    |
-| `unitPrice`          | `number`                     | BT-146 |  ✅   |    ✅    |
-| `grossUnitPrice`     | `number?`                    | BT-148 |       |    ✅    |
-| `lineTotal`          | `number?`                    | BT-131 |  ✅   |    ✅    |
-| `vatCategoryCode`    | `string?`                    | BT-151 |       |    ✅    |
-| `vatRatePercent`     | `number?`                    | BT-152 |       |    ✅    |
-| `description`        | `string?`                    | BT-154 |       |    ✅    |
-| `standardIdentifier` | `IdentifierWithSchemeInput?` | BT-157 |       |    ✅    |
-| `sellerAssignedId`   | `string?`                    | BT-155 |       |    ✅    |
-| `buyerAssignedId`    | `string?`                    | BT-156 |       |    ✅    |
+| Field                   | Type                         | BT     | BASIC | EN 16931 |
+| ----------------------- | ---------------------------- | ------ | :---: | :------: |
+| `id`                    | `string`                     | BT-126 |  ✅   |    ✅    |
+| `name`                  | `string`                     | BT-153 |  ✅   |    ✅    |
+| `quantity`              | `number`                     | BT-129 |  ✅   |    ✅    |
+| `unitCode`              | `string?`                    | BT-130 |  ✅   |    ✅    |
+| `unitPrice`             | `number`                     | BT-146 |  ✅   |    ✅    |
+| `grossUnitPrice`        | `number?`                    | BT-148 |       |    ✅    |
+| `priceDiscount`         | `number?`                    | BT-147 |       |    ✅    |
+| `basisQuantity`         | `number?`                    | BT-149 |       |    ✅    |
+| `basisQuantityUnitCode` | `string?`                    | BT-150 |       |    ✅    |
+| `lineTotal`             | `number?`                    | BT-131 |  ✅   |    ✅    |
+| `vatCategoryCode`       | `string?`                    | BT-151 |       |    ✅    |
+| `vatRatePercent`        | `number?`                    | BT-152 |       |    ✅    |
+| `description`           | `string?`                    | BT-154 |       |    ✅    |
+| `standardIdentifier`    | `IdentifierWithSchemeInput?` | BT-157 |       |    ✅    |
+| `sellerAssignedId`      | `string?`                    | BT-155 |       |    ✅    |
+| `buyerAssignedId`       | `string?`                    | BT-156 |       |    ✅    |
 
 ### InvoiceTotalsInput
 

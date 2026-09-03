@@ -67,6 +67,19 @@ function fmtAmt(n: number): string {
   return n.toFixed(2);
 }
 
+/**
+ * Formats a price-level amount (BT-146..BT-149 family): always at least two
+ * decimals, keeping up to four when the value carries more precision —
+ * EN 16931 does not cap unit-price amounts at two decimals, and sub-cent
+ * discounts (e.g. 10 % off a 0.25 price) are common in practice.
+ */
+function fmtPrice(n: number): string {
+  if (!Number.isFinite(n)) {
+    throw new Error(`Invalid amount value: ${n}. Expected a finite number.`);
+  }
+  return n.toFixed(4).replace(/(\.\d{2}\d*?)0+$/, "$1");
+}
+
 function tag(name: string, content: string, attrs?: Record<string, string>): string {
   const a = attrs
     ? Object.entries(attrs)
@@ -205,11 +218,29 @@ function buildLineItem(line: InvoiceLineInput, profile: Profile): string {
           unitCode: line.basisQuantityUnitCode ?? unitCode,
         })
       : "";
-  if (line.grossUnitPrice !== undefined)
+  // BT-147: the price discount sits after ChargeAmount and BasisQuantity in
+  // TradePriceType. EN 16931 allows only an allowance here (indicator false)
+  // with a bare ActualAmount — no CategoryTradeTax, which lives on the line's
+  // ApplicableTradeTax instead.
+  if (line.priceDiscount !== undefined && line.grossUnitPrice === undefined) {
+    throw new Error(
+      `buildXml: line "${line.id}" sets "priceDiscount" (BT-147) without "grossUnitPrice" (BT-148).`,
+    );
+  }
+  if (line.grossUnitPrice !== undefined) {
+    const discount =
+      line.priceDiscount !== undefined
+        ? tag(
+            "ram:AppliedTradeAllowanceCharge",
+            tag("ram:ChargeIndicator", tag("udt:Indicator", "false")) +
+              tag("ram:ActualAmount", fmtPrice(line.priceDiscount)),
+          )
+        : "";
     agree += tag(
       "ram:GrossPriceProductTradePrice",
-      tag("ram:ChargeAmount", fmtAmt(line.grossUnitPrice)) + basisQuantity,
+      tag("ram:ChargeAmount", fmtAmt(line.grossUnitPrice)) + basisQuantity + discount,
     );
+  }
   agree += tag(
     "ram:NetPriceProductTradePrice",
     tag("ram:ChargeAmount", fmtAmt(line.unitPrice)) + basisQuantity,
