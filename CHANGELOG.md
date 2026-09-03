@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.0] — 2026-09-03
+
 - **Added the item price discount (BT-147).** A new optional `priceDiscount`
   field on `InvoiceLineInput` emits `ram:AppliedTradeAllowanceCharge` inside
   the gross price element, so a line can state the discount that connects the
@@ -243,6 +245,7 @@ This element is not expected`. Reordered the three blocks in
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.4.0]: https://github.com/StackForge-EU/factur-x/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/StackForge-EU/factur-x/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/StackForge-EU/factur-x/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/StackForge-EU/factur-x/compare/v1.2.0...v1.2.1

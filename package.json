@@ -1,6 +1,6 @@
 {
   "name": "@stackforge-eu/factur-x",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "type": "module",
   "description": "Embed Factur-X, ZUGFeRD, and XRechnung structured invoice XML into PDF/A-3 documents",
   "keywords": [
