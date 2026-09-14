@@ -343,6 +343,10 @@ function buildMonetarySummation(t: InvoiceTotalsInput, profile: Profile): string
   x += tag("ram:TaxTotalAmount", fmtAmt(t.taxTotal), {
     currencyID: t.currency,
   });
+  // BT-114 sits between TaxTotalAmount and GrandTotalAmount in the XSD
+  // sequence. Only the EN 16931 and EXTENDED schemas define the element.
+  if (atLeast(profile, Profile.EN16931) && t.roundingAmount !== undefined)
+    x += tag("ram:RoundingAmount", fmtAmt(t.roundingAmount));
   x += tag("ram:GrandTotalAmount", fmtAmt(t.grandTotal));
 
   if (atLeast(profile, Profile.BASIC_WL) && t.prepaidAmount !== undefined)

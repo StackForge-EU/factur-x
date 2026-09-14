@@ -111,6 +111,23 @@ describe("validateXsd", () => {
     expect(result.errors).toHaveLength(0);
   });
 
+  it("validates EN16931 XML with a rounding amount and a prepaid amount (BT-114 element order)", async () => {
+    // RoundingAmount must sit between TaxTotalAmount and GrandTotalAmount
+    // (issue #17); TotalPrepaidAmount follows GrandTotalAmount.
+    const input = createEn16931Input();
+    input.totals = {
+      ...input.totals,
+      grandTotal: 2380,
+      prepaidAmount: 380,
+      roundingAmount: -0.4,
+      duePayableAmount: 1999.6,
+    };
+    const xml = buildXml(input, Profile.EN16931);
+    const result = await validateXsd(xml, Profile.EN16931, { schemaBasePath });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
   it("validates a credit note referencing a dated preceding invoice (qdt:DateTimeString namespace)", async () => {
     // Regression (issue #5): ram:FormattedIssueDateTime is typed as
     // qdt:FormattedDateTimeType, so its child must be qdt:DateTimeString.

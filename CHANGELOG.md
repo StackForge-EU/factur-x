@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **Added the rounding amount (BT-114).** A new optional `roundingAmount`
+  field on `InvoiceTotalsInput` emits `ram:RoundingAmount` between the tax
+  total and the grand total, so an invoice can state the amount that takes
+  the grand total (BT-112) to the payable figure (BT-115). Emitted for
+  EN 16931 and EXTENDED only, as the lower-profile XSDs do not define the
+  element. `validateInput` now also checks BR-CO-16
+  (`duePayableAmount = grandTotal - prepaidAmount + roundingAmount`), which
+  the schematron already enforced. Omitting the field keeps the output
+  byte-for-byte identical (#17).
+
 ## [1.4.0] — 2026-09-03
 
 - **Added the item price discount (BT-147).** A new optional `priceDiscount`

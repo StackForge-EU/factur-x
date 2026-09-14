@@ -107,7 +107,11 @@ interface FacturXInvoiceInput {
 | `allowanceTotal`   | `number?` | BT-107 |         |    ✅    |
 | `chargeTotal`      | `number?` | BT-108 |         |    ✅    |
 | `prepaidAmount`    | `number?` | BT-113 |         |    ✅    |
+| `roundingAmount`   | `number?` | BT-114 |         |   ✅¹    |
 | `taxCurrency`      | `string?` | BT-6   |         |    ✅    |
+
+¹ Emitted for EN 16931 and EXTENDED only — the BASIC / BASIC WL XSDs do not
+define `ram:RoundingAmount`, so the field is dropped for lower profiles.
 
 ### VatBreakdownInput
 

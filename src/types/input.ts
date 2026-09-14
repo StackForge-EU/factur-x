@@ -1077,6 +1077,15 @@ export interface InvoiceTotalsInput {
   prepaidAmount?: number;
 
   /**
+   * Rounding amount — the amount added to the grand total (BT-112) to round
+   * the amount due (BT-115) to a payable figure, e.g. `0.02` to take
+   * `29.95` to `29.97`. Emitted as `ram:RoundingAmount` for EN 16931 and
+   * EXTENDED only; the BASIC / BASIC WL XSDs do not define the element.
+   * @see EN 16931 BT-114, BR-CO-16
+   */
+  roundingAmount?: number;
+
+  /**
    * Due payable amount.
    * @see EN 16931 BT-115
    */
