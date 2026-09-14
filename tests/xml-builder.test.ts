@@ -402,6 +402,38 @@ describe("Item price discount (BT-147)", () => {
   });
 });
 
+describe("Rounding amount (BT-114)", () => {
+  it("emits RoundingAmount between TaxTotalAmount and GrandTotalAmount (XSD element order)", () => {
+    const input = createEn16931Input();
+    input.totals = {
+      ...input.totals,
+      taxBasisTotal: 25.17,
+      taxTotal: 4.78,
+      grandTotal: 29.95,
+      roundingAmount: 0.02,
+      duePayableAmount: 29.97,
+    };
+    const xml = buildXml(input, Profile.EN16931);
+    expect(xml).toContain(
+      '<ram:TaxTotalAmount currencyID="EUR">4.78</ram:TaxTotalAmount>' +
+        "<ram:RoundingAmount>0.02</ram:RoundingAmount>" +
+        "<ram:GrandTotalAmount>29.95</ram:GrandTotalAmount>",
+    );
+  });
+
+  it("drops the rounding amount for BASIC (element not defined in that XSD)", () => {
+    const input = createBasicInput();
+    input.totals = { ...input.totals, roundingAmount: 0.02 };
+    const xml = buildXml(input, Profile.BASIC);
+    expect(xml).not.toContain("RoundingAmount");
+  });
+
+  it("omits RoundingAmount when not provided (output unchanged)", () => {
+    const xml = buildXml(createEn16931Input(), Profile.EN16931);
+    expect(xml).not.toContain("RoundingAmount");
+  });
+});
+
 describe("Edge cases", () => {
   it("escapes XML special characters in seller name", () => {
     const input = createMinimumInput({

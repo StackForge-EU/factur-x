@@ -640,6 +640,43 @@ describe("BR-CO-15 totals consistency", () => {
   });
 });
 
+describe("BR-CO-16 amount due = grandTotal - prepaidAmount + roundingAmount", () => {
+  it("rejects duePayableAmount that ignores the rounding amount", () => {
+    const input = createEn16931Input({
+      totals: {
+        ...createEn16931Input().totals,
+        roundingAmount: 0.02,
+        duePayableAmount: createEn16931Input().totals.grandTotal, // wrong: rounding not applied
+      },
+    });
+    const result = validateInput(input, Profile.EN16931);
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((e) => e.field)).toContain("totals.duePayableAmount");
+  });
+
+  it("accepts duePayableAmount that applies both prepaid and rounding amounts", () => {
+    const base = createEn16931Input().totals;
+    const input = createEn16931Input({
+      totals: {
+        ...base,
+        prepaidAmount: 380,
+        roundingAmount: -0.4,
+        duePayableAmount: base.grandTotal - 380 - 0.4,
+      },
+    });
+    const result = validateInput(input, Profile.EN16931);
+    expect(result.errors.filter((e) => e.field === "totals.duePayableAmount")).toHaveLength(0);
+  });
+
+  it("rejects duePayableAmount that disagrees with grandTotal when neither optional amount is set", () => {
+    const input = createBasicInput({
+      totals: { ...createBasicInput().totals, duePayableAmount: 1 },
+    });
+    const result = validateInput(input, Profile.BASIC);
+    expect(result.errors.map((e) => e.field)).toContain("totals.duePayableAmount");
+  });
+});
+
 describe("BR-CO-10 sum of line nets equals lineTotal", () => {
   it("rejects when totals.lineTotal disagrees with Σ line.lineTotal", () => {
     const base = createBasicInput();

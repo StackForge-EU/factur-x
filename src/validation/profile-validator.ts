@@ -319,6 +319,25 @@ export function validateInput(
     }
   }
 
+  // BR-CO-16: Amount due for payment (BT-115) = Invoice total amount with
+  // VAT (BT-112) - Paid amount (BT-113) + Rounding amount (BT-114).
+  if (req(Profile.BASIC_WL) && input.totals) {
+    const t = input.totals;
+    if (t.grandTotal != null && t.duePayableAmount != null) {
+      const prepaid = t.prepaidAmount ?? 0;
+      const rounding = t.roundingAmount ?? 0;
+      const expected = round2(t.grandTotal - prepaid + rounding);
+      if (Math.abs(round2(t.duePayableAmount) - expected) > 0.01) {
+        addError(
+          errors,
+          "totals.duePayableAmount",
+          `duePayableAmount ${t.duePayableAmount} does not equal grandTotal - prepaidAmount + roundingAmount (${expected}) (BR-CO-16).`,
+          Profile.BASIC_WL,
+        );
+      }
+    }
+  }
+
   // BR-CO-13: Invoice total amount without VAT (BT-109) = Σ Invoice line net
   // amounts (BT-106) - Σ document level allowances (BT-107) + Σ document
   // level charges (BT-108). The original report tripped this via a
