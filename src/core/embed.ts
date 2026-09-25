@@ -483,7 +483,8 @@ export async function embedFacturX(options: EmbedOptions): Promise<EmbedResult> 
   const xmlBytes = new TextEncoder().encode(xml);
   const afRel = resolveAfRelationship(profile, options.afRelationship);
   await pdfDoc.attach(xmlBytes, flavorConfig.attachmentFilename, {
-    mimeType: "application/xml",
+    // Factur-X mandates text/xml on the filespec; the FNFE validator rejects application/xml.
+    mimeType: "text/xml",
     afRelationship: afRel,
     description: "Factur-X Invoice",
   });

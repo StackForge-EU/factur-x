@@ -53,6 +53,8 @@ jobs:
             j.version = '${NEW_VERSION}';
             f.writeFileSync('jsr.json', JSON.stringify(j, null, 2) + '\n');
           "
+          # JSON.stringify expands the arrays; keep the file prettier-clean so CI passes after the release commit.
+          npx prettier --write jsr.json
 
           echo "old=${OLD_VERSION}" >> "$GITHUB_OUTPUT"
           echo "new=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
