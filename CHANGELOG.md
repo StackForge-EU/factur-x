@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.2] — 2026-09-25
+
 - **Fixed the embedded XML MIME type back to `text/xml`.** 1.2.1 switched the
   `factur-x.xml` filespec `/Subtype` to `application/xml` (#7), but the
   Factur-X specification requires `text/xml`, and the official FNFE-MPE
@@ -263,6 +265,7 @@ This element is not expected`. Reordered the three blocks in
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.4.2]: https://github.com/StackForge-EU/factur-x/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/StackForge-EU/factur-x/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/StackForge-EU/factur-x/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/StackForge-EU/factur-x/compare/v1.3.0...v1.3.1
