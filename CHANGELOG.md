@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **Fixed the embedded XML MIME type back to `text/xml`.** 1.2.1 switched the
+  `factur-x.xml` filespec `/Subtype` to `application/xml` (#7), but the
+  Factur-X specification requires `text/xml`, and the official FNFE-MPE
+  validator rejects anything else. PDFs generated with 1.2.1 through 1.4.1
+  should be regenerated. A test now pins the value (#19).
+
 ## [1.4.1] — 2026-09-14
 
 - **Added the rounding amount (BT-114).** A new optional `roundingAmount`

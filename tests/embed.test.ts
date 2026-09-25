@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PDFDocument, PDFName, PDFDict, PDFArray, PDFHexString } from "pdf-lib";
+import { PDFDocument, PDFName, PDFDict, PDFArray, PDFHexString, PDFStream } from "pdf-lib";
 import { embedFacturX } from "../src/core/embed";
 import { buildXml } from "../src/core/xml-builder";
 import { Profile, Flavor } from "../src/flavors/constants";
@@ -343,28 +343,46 @@ describe("addPdfA3Metadata", () => {
   });
 });
 
+// Returns the first embedded file's filespec dictionary (Names → EmbeddedFiles → Names[1]).
+function getFileSpec(pdfDoc: PDFDocument): PDFDict | undefined {
+  const namesDict = pdfDoc.catalog.get(PDFName.of("Names"));
+  if (!namesDict) return undefined;
+  const resolved = namesDict instanceof PDFDict ? namesDict : pdfDoc.context.lookup(namesDict);
+  if (!(resolved instanceof PDFDict)) return undefined;
+  const ef = resolved.get(PDFName.of("EmbeddedFiles"));
+  const efResolved = ef instanceof PDFDict ? ef : pdfDoc.context.lookup(ef as any);
+  if (!(efResolved instanceof PDFDict)) return undefined;
+  const namesArr = efResolved.get(PDFName.of("Names"));
+  const namesArrResolved =
+    namesArr instanceof PDFArray ? namesArr : pdfDoc.context.lookup(namesArr as any);
+  if (!(namesArrResolved instanceof PDFArray)) return undefined;
+  for (let i = 0; i < namesArrResolved.size(); i += 2) {
+    const fs = pdfDoc.context.lookup(namesArrResolved.get(i + 1) as any);
+    if (fs instanceof PDFDict) return fs;
+  }
+  return undefined;
+}
+
+describe("Embedded file MIME type", () => {
+  it("declares /Subtype text/xml as the Factur-X spec requires (FNFE validator rejects application/xml)", async () => {
+    const pdf = await createTestPdf();
+    const result = await embedFacturX({
+      pdf,
+      input: createEn16931Input(),
+      profile: Profile.EN16931,
+    });
+
+    const pdfDoc = await PDFDocument.load(result.pdf, { updateMetadata: false });
+    const fs = getFileSpec(pdfDoc);
+    const efDict = fs?.lookup(PDFName.of("EF")) as PDFDict;
+    const stream = efDict.lookup(PDFName.of("F")) as PDFStream;
+    expect(stream.dict.lookup(PDFName.of("Subtype"))).toBe(PDFName.of("text/xml"));
+  });
+});
+
 describe("AFRelationship", () => {
   function getAfRelationship(pdfDoc: PDFDocument): string | undefined {
-    const namesDict = pdfDoc.catalog.get(PDFName.of("Names"));
-    if (!namesDict) return undefined;
-    const resolved = namesDict instanceof PDFDict ? namesDict : pdfDoc.context.lookup(namesDict);
-    if (!(resolved instanceof PDFDict)) return undefined;
-    const ef = resolved.get(PDFName.of("EmbeddedFiles"));
-    const efResolved = ef instanceof PDFDict ? ef : pdfDoc.context.lookup(ef as any);
-    if (!(efResolved instanceof PDFDict)) return undefined;
-    const namesArr = efResolved.get(PDFName.of("Names"));
-    const namesArrResolved =
-      namesArr instanceof PDFArray ? namesArr : pdfDoc.context.lookup(namesArr as any);
-    if (!(namesArrResolved instanceof PDFArray)) return undefined;
-    for (let i = 0; i < namesArrResolved.size(); i += 2) {
-      const fsRef = namesArrResolved.get(i + 1);
-      const fs = pdfDoc.context.lookup(fsRef as any);
-      if (fs instanceof PDFDict) {
-        const afRel = fs.get(PDFName.of("AFRelationship"));
-        return afRel?.toString();
-      }
-    }
-    return undefined;
+    return getFileSpec(pdfDoc)?.get(PDFName.of("AFRelationship"))?.toString();
   }
 
   it("uses Data AFRelationship for MINIMUM profile", async () => {
