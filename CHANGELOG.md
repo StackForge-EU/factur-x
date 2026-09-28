@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **Fixed half-cent VAT rounding in `validateInput`.** `Math.round(n * 100) / 100`
+  turns `402.50 × 19%` (`76.475`) into `76.47`, because `76.475 * 100` is
+  `7647.499999999999`, so BR-CO-17 rejected the correctly rounded `76.48`.
+
 ## [1.4.2] — 2026-09-25
 
 - **Fixed the embedded XML MIME type back to `text/xml`.** 1.2.1 switched the

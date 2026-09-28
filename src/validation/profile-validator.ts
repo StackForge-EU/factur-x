@@ -512,7 +512,13 @@ export function validateInput(
 
 /** Round to 2 decimal places (currency precision). */
 function round2(n: number): number {
-  return Math.round(n * 100) / 100;
+  // Math.round(n * 100) turns 76.475 into 7647.499999999999, so 402.50 × 19%
+  // became 76.47 and BR-CO-17 rejected the correctly rounded 76.48.
+  const pair = `${n}e`.split("e");
+  const exponent = Number(pair[1] ?? 0);
+  const value = Math.round(Number(`${pair[0]}e${exponent + 2}`));
+  const shifted = `${value}e`.split("e");
+  return Number(`${shifted[0]}e${Number(shifted[1] ?? 0) - 2}`);
 }
 
 /**
