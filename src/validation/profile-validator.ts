@@ -9,6 +9,7 @@
 
 import { Profile, Flavor } from "../flavors/constants";
 import type { FacturXInvoiceInput } from "../types/input";
+import { roundHalfUp, toCents } from "../core/rounding";
 
 /** Profile order for cumulative requirement checks */
 const PROFILE_LEVEL: Record<Profile, number> = {
@@ -307,8 +308,8 @@ export function validateInput(
   if (req(Profile.BASIC_WL) && input.totals) {
     const t = input.totals;
     if (t.taxBasisTotal != null && t.taxTotal != null && t.grandTotal != null) {
-      const expected = round2(t.taxBasisTotal + t.taxTotal);
-      if (Math.abs(round2(t.grandTotal) - expected) > 0.01) {
+      const expected = roundHalfUp(t.taxBasisTotal + t.taxTotal);
+      if (amountsDiffer(t.grandTotal, expected)) {
         addError(
           errors,
           "totals.grandTotal",
@@ -326,8 +327,8 @@ export function validateInput(
     if (t.grandTotal != null && t.duePayableAmount != null) {
       const prepaid = t.prepaidAmount ?? 0;
       const rounding = t.roundingAmount ?? 0;
-      const expected = round2(t.grandTotal - prepaid + rounding);
-      if (Math.abs(round2(t.duePayableAmount) - expected) > 0.01) {
+      const expected = roundHalfUp(t.grandTotal - prepaid + rounding);
+      if (amountsDiffer(t.duePayableAmount, expected)) {
         addError(
           errors,
           "totals.duePayableAmount",
@@ -347,8 +348,8 @@ export function validateInput(
     if (t.lineTotal != null && t.taxBasisTotal != null) {
       const allowance = t.allowanceTotal ?? 0;
       const charge = t.chargeTotal ?? 0;
-      const expected = round2(t.lineTotal - allowance + charge);
-      if (Math.abs(round2(t.taxBasisTotal) - expected) > 0.01) {
+      const expected = roundHalfUp(t.lineTotal - allowance + charge);
+      if (amountsDiffer(t.taxBasisTotal, expected)) {
         addError(
           errors,
           "totals.taxBasisTotal",
@@ -372,11 +373,11 @@ export function validateInput(
       return sum + lineNet;
     }, 0);
     if (input.totals.lineTotal != null) {
-      if (Math.abs(round2(input.totals.lineTotal) - round2(sumLineNets)) > 0.01) {
+      if (amountsDiffer(input.totals.lineTotal, sumLineNets)) {
         addError(
           errors,
           "totals.lineTotal",
-          `lineTotal ${input.totals.lineTotal} does not equal Σ line nets (${round2(sumLineNets)}) (BR-CO-10).`,
+          `lineTotal ${input.totals.lineTotal} does not equal Σ line nets (${roundHalfUp(sumLineNets)}) (BR-CO-10).`,
           Profile.BASIC,
         );
       }
@@ -386,11 +387,11 @@ export function validateInput(
   // BR-CO-14: Σ vatBreakdown[i].taxAmount = totals.taxTotal (BT-110).
   if (req(Profile.BASIC_WL) && input.totals?.taxTotal != null && input.vatBreakdown) {
     const sumVat = input.vatBreakdown.reduce((s, v) => s + (v.taxAmount ?? 0), 0);
-    if (Math.abs(round2(input.totals.taxTotal) - round2(sumVat)) > 0.01) {
+    if (amountsDiffer(input.totals.taxTotal, sumVat)) {
       addError(
         errors,
         "totals.taxTotal",
-        `taxTotal ${input.totals.taxTotal} does not equal Σ vatBreakdown.taxAmount (${round2(sumVat)}) (BR-CO-14).`,
+        `taxTotal ${input.totals.taxTotal} does not equal Σ vatBreakdown.taxAmount (${roundHalfUp(sumVat)}) (BR-CO-14).`,
         Profile.BASIC_WL,
       );
     }
@@ -402,8 +403,8 @@ export function validateInput(
   if (req(Profile.BASIC_WL) && input.vatBreakdown) {
     input.vatBreakdown.forEach((vb, i) => {
       if (vb.taxableAmount != null && vb.taxAmount != null && vb.ratePercent != null) {
-        const expected = round2((vb.taxableAmount * vb.ratePercent) / 100);
-        if (Math.abs(round2(vb.taxAmount) - expected) > 0.01) {
+        const expected = roundHalfUp((vb.taxableAmount * vb.ratePercent) / 100);
+        if (amountsDiffer(vb.taxAmount, expected)) {
           addError(
             errors,
             `vatBreakdown[${i}].taxAmount`,
@@ -510,9 +511,12 @@ export function validateInput(
   };
 }
 
-/** Round to 2 decimal places (currency precision). */
-function round2(n: number): number {
-  return Math.round(n * 100) / 100;
+/**
+ * True when two amounts are more than one cent apart. Compared in integer
+ * cents, since `76.48 - 76.47 > 0.01` is true in binary floating point.
+ */
+function amountsDiffer(actual: number, expected: number): boolean {
+  return Math.abs(toCents(actual) - toCents(expected)) > 1;
 }
 
 /**

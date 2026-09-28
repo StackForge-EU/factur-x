@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **Fixed half-cent rounding.** `Math.round(n * 100) / 100` turns
+  `402.50 × 19%` (`76.475`) into `76.47`, because `76.475 * 100` is
+  `7647.499999999999`, so `validateInput` rejected the correctly rounded
+  `76.48` (BR-CO-17). Amounts are now rounded half away from zero on a
+  noise-free value and compared in integer cents, in the validator and in
+  the XML builder alike. Reported by @johannesspohr (#21).
+
 ## [1.4.2] — 2026-09-25
 
 - **Fixed the embedded XML MIME type back to `text/xml`.** 1.2.1 switched the
