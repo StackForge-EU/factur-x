@@ -738,6 +738,27 @@ describe("BR-CO-17 vat amount = round(basis × rate / 100)", () => {
     expect(result.valid).toBe(false);
     expect(result.errors.map((e) => e.field)).toContain("vatBreakdown[0].taxAmount");
   });
+
+  it("accepts 76.48 for a 402.50 basis at 19%, which is an exact half cent", () => {
+    const line = createBasicInput().lines![0];
+    const input = createBasicInput({
+      lines: [{ ...line, quantity: 1, unitPrice: 402.5, lineTotal: 402.5 }],
+      totals: {
+        lineTotal: 402.5,
+        taxBasisTotal: 402.5,
+        taxTotal: 76.48,
+        grandTotal: 478.98,
+        duePayableAmount: 478.98,
+        currency: "EUR",
+      },
+      vatBreakdown: [
+        { categoryCode: "S", ratePercent: 19, taxableAmount: 402.5, taxAmount: 76.48 },
+      ],
+    });
+    const result = validateInput(input, Profile.BASIC);
+    expect(result.errors).toEqual([]);
+    expect(result.valid).toBe(true);
+  });
 });
 
 describe("BR-FX-EN-04 delivery date / billing period", () => {

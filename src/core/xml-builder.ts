@@ -13,6 +13,7 @@ import type {
 import { Profile, Flavor, PROFILE_URNS, XRECHNUNG_PROFILE_URN } from "../flavors/constants";
 
 import { resolveTypeCode } from "../flavors/registry";
+import { roundHalfUp } from "./rounding";
 
 // ---------------------------------------------------------------------------
 // Profile level comparison
@@ -64,7 +65,7 @@ function fmtAmt(n: number): string {
   if (!Number.isFinite(n)) {
     throw new Error(`Invalid amount value: ${n}. Expected a finite number.`);
   }
-  return n.toFixed(2);
+  return roundHalfUp(n).toFixed(2);
 }
 
 /**
@@ -259,7 +260,7 @@ function buildLineItem(line: InvoiceLineInput, profile: Profile): string {
     settle += tag("ram:ApplicableTradeTax", tx);
   }
   // Round the fallback to currency precision so 0.1 × 3 ≠ 0.30000000000000004.
-  const lineTotal = line.lineTotal ?? Math.round(line.quantity * line.unitPrice * 100) / 100;
+  const lineTotal = line.lineTotal ?? roundHalfUp(line.quantity * line.unitPrice);
   settle += tag(
     "ram:SpecifiedTradeSettlementLineMonetarySummation",
     tag("ram:LineTotalAmount", fmtAmt(lineTotal)),
