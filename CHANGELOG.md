@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.3] — 2026-09-28
+
 - **Fixed half-cent rounding.** `Math.round(n * 100) / 100` turns
   `402.50 × 19%` (`76.475`) into `76.47`, because `76.475 * 100` is
   `7647.499999999999`, so `validateInput` rejected the correctly rounded
@@ -272,6 +274,7 @@ This element is not expected`. Reordered the three blocks in
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.4.3]: https://github.com/StackForge-EU/factur-x/compare/v1.4.2...v1.4.3
 [1.4.2]: https://github.com/StackForge-EU/factur-x/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/StackForge-EU/factur-x/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/StackForge-EU/factur-x/compare/v1.3.1...v1.4.0
