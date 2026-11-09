@@ -1184,6 +1184,13 @@ export interface DocumentReferenceInput {
 
   /** Issue date of the referenced document */
   issueDate?: string;
+
+  /**
+   * Project name, only used for `"project"` references. The CII schema
+   * requires a `ram:Name` next to the project ID (BT-11); falls back to
+   * `"Project"` when omitted.
+   */
+  name?: string;
 }
 
 // ---------------------------------------------------------------------------

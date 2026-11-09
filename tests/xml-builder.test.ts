@@ -612,8 +612,16 @@ describe("Reference types", () => {
       references: [{ id: "PRJ-42", type: "project" }],
     });
     const xml = buildXml(input, Profile.EN16931);
-    expect(xml).toContain("SpecifiedProcuringProject");
-    expect(xml).toContain("PRJ-42");
+    expect(xml).toContain(
+      "<ram:SpecifiedProcuringProject><ram:ID>PRJ-42</ram:ID><ram:Name>Project</ram:Name></ram:SpecifiedProcuringProject>",
+    );
+  });
+
+  it("uses the given project name", () => {
+    const input = createEn16931Input({
+      references: [{ id: "PRJ-42", type: "project", name: "Rooftop PV" }],
+    });
+    expect(buildXml(input, Profile.EN16931)).toContain("<ram:Name>Rooftop PV</ram:Name>");
   });
 
   it("defaults reference type to order", () => {
@@ -639,6 +647,26 @@ describe("Reference types", () => {
     expect(xml).toContain("ContractReferencedDocument");
     expect(xml).toContain("DespatchAdviceReferencedDocument");
     expect(xml).toContain("InvoiceReferencedDocument");
+  });
+
+  it("emits header references in XSD sequence regardless of input order (#23)", () => {
+    const input = createEn16931Input({
+      references: [
+        { id: "PRJ-42", type: "project" },
+        { id: "CT-002", type: "contract" },
+        { id: "PO-001", type: "order" },
+        { id: "SO-003", type: "seller-order" },
+      ],
+    });
+    const xml = buildXml(input, Profile.EN16931);
+    const positions = [
+      "SellerOrderReferencedDocument",
+      "BuyerOrderReferencedDocument",
+      "ContractReferencedDocument",
+      "SpecifiedProcuringProject",
+    ].map((el) => xml.indexOf(`<ram:${el}>`));
+    expect(positions.every((p) => p >= 0)).toBe(true);
+    expect(positions).toEqual([...positions].sort((a, b) => a - b));
   });
 });
 

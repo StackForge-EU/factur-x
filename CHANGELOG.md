@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **Fixed header reference element order.** `buildXml` emitted
+  `input.references` in input order, so an `order` reference listed before a
+  `seller-order` (or `contract`) reference produced XML that failed XSD
+  validation. References are now emitted in the CII sequence (SellerOrder →
+  BuyerOrder → Contract → SpecifiedProcuringProject); input order is only
+  kept among references of the same type. Reported by @SCPAU100 (#23).
+- **Fixed `project` references failing XSD validation.** `SpecifiedProcuringProject`
+  requires a `ram:Name` child that was never emitted. A new optional `name`
+  field on `DocumentReferenceInput` fills it, defaulting to `"Project"`.
+- **`validateInput` rejects duplicate single-occurrence references.** The
+  schema allows `order`, `contract`, `seller-order`, `project` and `despatch`
+  references at most once each, and `delivery.despatchAdviceReference` and a
+  `despatch` reference target the same element. Both cases used to surface
+  only as an XSD error after building.
+
 ## [1.4.3] — 2026-09-28
 
 - **Fixed half-cent rounding.** `Math.round(n * 100) / 100` turns
