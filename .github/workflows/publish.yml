@@ -1,0 +1,69 @@
+name: Publish
+
+# Dispatched by release.yml on the freshly pushed release tag. Can also be
+# run by hand on a tag (or on main right after a release) to retry a publish
+# that failed on one registry: each job skips a version its registry already
+# has, so a retry only publishes what is still missing.
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-jsr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Install dependencies
+        run: deno install
+
+      - name: Publish to JSR
+        run: |
+          VERSION=$(jq -r .version package.json)
+          if curl -fsS "https://jsr.io/@stackforge-eu/factur-x/${VERSION}_meta.json" > /dev/null; then
+            echo "@stackforge-eu/factur-x@${VERSION} is already on JSR, skipping."
+            exit 0
+          fi
+          deno publish
+
+  # Runs after publish-jsr: npm versions are effectively immutable, so the
+  # registry we cannot retract from publishes only once JSR has succeeded.
+  publish-npm:
+    needs: publish-jsr
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Upgrade npm (OIDC trusted publishing requires >=11.5.1)
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish to npm
+        run: |
+          VERSION=$(jq -r .version package.json)
+          if npm view "@stackforge-eu/factur-x@${VERSION}" version > /dev/null 2>&1; then
+            echo "@stackforge-eu/factur-x@${VERSION} is already on npm, skipping."
+            exit 0
+          fi
+          npm publish --provenance --access public
