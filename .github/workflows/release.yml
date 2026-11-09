@@ -17,8 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    outputs:
-      version: ${{ steps.version.outputs.new }}
+      actions: write
     steps:
       - uses: actions/checkout@v4
 
@@ -94,55 +93,11 @@ jobs:
           name: v${{ steps.version.outputs.new }}
           body_path: RELEASE_NOTES.md
 
-  # Runs after publish-jsr: npm versions are effectively immutable, so the
-  # registry we cannot retract from publishes only once JSR has succeeded.
-  publish-npm:
-    needs: [release, publish-jsr]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: v${{ needs.release.outputs.version }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24.15.0
-          cache: npm
-          registry-url: https://registry.npmjs.org
-
-      - name: Upgrade npm (OIDC trusted publishing requires >=11.5.1)
-        run: npm install -g npm@latest
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Publish to npm
-        run: npm publish --provenance --access public
-
-  publish-jsr:
-    needs: release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: v${{ needs.release.outputs.version }}
-
-      - uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
-
-      - name: Install dependencies
-        run: deno install
-
-      - name: Publish to JSR
-        run: deno publish
+      # Publishing runs in its own workflow, dispatched on the tag, so the
+      # provenance attests the release commit instead of the one before the
+      # version bump. A tag pushed with GITHUB_TOKEN triggers no workflows,
+      # hence the explicit dispatch.
+      - name: Dispatch publish
+        run: gh workflow run publish.yml --ref "v${{ steps.version.outputs.new }}"
+        env:
+          GH_TOKEN: ${{ github.token }}
