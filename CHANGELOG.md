@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.4] — 2026-11-09
+
 - **Fixed header reference element order.** `buildXml` emitted
   `input.references` in input order, so an `order` reference listed before a
   `seller-order` (or `contract`) reference produced XML that failed XSD
@@ -289,6 +291,7 @@ This element is not expected`. Reordered the three blocks in
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.4.4]: https://github.com/StackForge-EU/factur-x/compare/v1.4.3...v1.4.4
 [1.4.3]: https://github.com/StackForge-EU/factur-x/compare/v1.4.2...v1.4.3
 [1.4.2]: https://github.com/StackForge-EU/factur-x/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/StackForge-EU/factur-x/compare/v1.4.0...v1.4.1
