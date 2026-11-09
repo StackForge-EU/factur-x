@@ -1,13 +1,14 @@
 name: Publish
 
 # Dispatched by release.yml on the freshly pushed release tag. Can also be
-# run by hand on a tag to retry a publish that failed.
+# run by hand on a tag (or on main right after a release) to retry a publish
+# that failed on one registry: each job skips a version its registry already
+# has, so a retry only publishes what is still missing.
 on:
   workflow_dispatch:
 
 jobs:
   publish-jsr:
-    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,7 +24,13 @@ jobs:
         run: deno install
 
       - name: Publish to JSR
-        run: deno publish
+        run: |
+          VERSION=$(jq -r .version package.json)
+          if curl -fsS "https://jsr.io/@stackforge-eu/factur-x/${VERSION}_meta.json" > /dev/null; then
+            echo "@stackforge-eu/factur-x@${VERSION} is already on JSR, skipping."
+            exit 0
+          fi
+          deno publish
 
   # Runs after publish-jsr: npm versions are effectively immutable, so the
   # registry we cannot retract from publishes only once JSR has succeeded.
@@ -53,4 +60,10 @@ jobs:
         run: npm run build
 
       - name: Publish to npm
-        run: npm publish --provenance --access public
+        run: |
+          VERSION=$(jq -r .version package.json)
+          if npm view "@stackforge-eu/factur-x@${VERSION}" version > /dev/null 2>&1; then
+            echo "@stackforge-eu/factur-x@${VERSION} is already on npm, skipping."
+            exit 0
+          fi
+          npm publish --provenance --access public
