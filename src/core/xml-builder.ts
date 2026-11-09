@@ -1,5 +1,6 @@
 import { UnitCode, DocumentTypeCode } from "../types/input";
 import type {
+  DocumentReferenceInput,
   FacturXInvoiceInput,
   TradePartyInput,
   AddressInput,
@@ -448,32 +449,31 @@ export function buildXml(input: FacturXInvoiceInput, profile: Profile, flavor?: 
       buildParty(input.sellerTaxRepresentative, profile),
     );
 
+  // Header references (BT-12..BT-14, BT-11). The XSD sequence in
+  // HeaderTradeAgreementType is SellerOrder → BuyerOrder → Contract →
+  // AdditionalReferencedDocument → SpecifiedProcuringProject, so references
+  // are emitted in that order regardless of their position in the input (#23).
+  // Input order is only kept among references of the same type.
   if (input.references && atLeast(profile, Profile.BASIC_WL)) {
-    for (const ref of input.references) {
-      const refType = ref.type ?? "order";
-      if (refType === "preceding" || refType === "despatch") continue;
+    const refsOfType = (type: DocumentReferenceInput["type"]) =>
+      input.references!.filter((ref) => (ref.type ?? "order") === type);
+    const refDoc = (ref: DocumentReferenceInput) =>
+      tag("ram:IssuerAssignedID", escapeXml(ref.id)) +
+      (ref.issueDate ? dateEl("ram:FormattedIssueDateTime", ref.issueDate) : "");
 
-      const inner =
-        tag("ram:IssuerAssignedID", escapeXml(ref.id)) +
-        (ref.issueDate ? dateEl("ram:FormattedIssueDateTime", ref.issueDate) : "");
-
-      switch (refType) {
-        case "order":
-          agree += tag("ram:BuyerOrderReferencedDocument", inner);
-          break;
-        case "contract":
-          agree += tag("ram:ContractReferencedDocument", inner);
-          break;
-        case "seller-order":
-          if (atLeast(profile, Profile.EN16931))
-            agree += tag("ram:SellerOrderReferencedDocument", inner);
-          break;
-        case "project":
-          if (atLeast(profile, Profile.EN16931))
-            agree += tag("ram:SpecifiedProcuringProject", tag("ram:ID", escapeXml(ref.id)));
-          break;
-      }
-    }
+    if (atLeast(profile, Profile.EN16931))
+      for (const ref of refsOfType("seller-order"))
+        agree += tag("ram:SellerOrderReferencedDocument", refDoc(ref));
+    for (const ref of refsOfType("order"))
+      agree += tag("ram:BuyerOrderReferencedDocument", refDoc(ref));
+    for (const ref of refsOfType("contract"))
+      agree += tag("ram:ContractReferencedDocument", refDoc(ref));
+    if (atLeast(profile, Profile.EN16931))
+      for (const ref of refsOfType("project"))
+        agree += tag(
+          "ram:SpecifiedProcuringProject",
+          tag("ram:ID", escapeXml(ref.id)) + tag("ram:Name", escapeXml(ref.name ?? "Project")),
+        );
   }
 
   tx += tag("ram:ApplicableHeaderTradeAgreement", agree);

@@ -435,6 +435,34 @@ export function validateInput(
     }
   }
 
+  // The CII schema allows each of these header references at most once
+  // (maxOccurs="1"), so duplicates would fail XSD validation after building.
+  if (req(Profile.BASIC_WL) && input.references) {
+    const singleOccurrence = ["order", "contract", "seller-order", "project", "despatch"] as const;
+    for (const type of singleOccurrence) {
+      const count = input.references.filter((ref) => (ref.type ?? "order") === type).length;
+      if (count > 1) {
+        addError(
+          errors,
+          "references",
+          `Only one "${type}" reference is allowed, got ${count}.`,
+          Profile.BASIC_WL,
+        );
+      }
+    }
+    if (
+      input.delivery?.despatchAdviceReference &&
+      input.references.some((ref) => ref.type === "despatch")
+    ) {
+      addError(
+        errors,
+        "references",
+        'Use either delivery.despatchAdviceReference or a "despatch" reference, not both.',
+        Profile.BASIC_WL,
+      );
+    }
+  }
+
   // XRechnung-specific (BR-DE / PEPPOL-EN16931). Only applied when the
   // caller asks to emit XRechnung, since pure Factur-X does not require these.
   if (flavor === Flavor.XRECHNUNG) {

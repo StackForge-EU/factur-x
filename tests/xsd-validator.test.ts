@@ -144,6 +144,23 @@ describe("validateXsd", () => {
     expect(result.errors).toHaveLength(0);
   });
 
+  it("validates EN16931 XML with header references given in reverse schema order (#23)", async () => {
+    const xml = buildXml(
+      createEn16931Input({
+        references: [
+          { id: "PRJ-42", type: "project" },
+          { id: "CT-2025-010", type: "contract", issueDate: "2025-01-15" },
+          { id: "PO-4711", type: "order" },
+          { id: "SO-0815", type: "seller-order" },
+        ],
+      }),
+      Profile.EN16931,
+    );
+    const result = await validateXsd(xml, Profile.EN16931, { schemaBasePath });
+    expect(result.errors).toEqual([]);
+    expect(result.valid).toBe(true);
+  });
+
   it("rejects invalid XML", async () => {
     const xml = '<?xml version="1.0" encoding="UTF-8"?><invalid>not a CII document</invalid>';
     const result = await validateXsd(xml, Profile.MINIMUM, { schemaBasePath });

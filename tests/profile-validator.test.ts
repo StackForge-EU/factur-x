@@ -870,3 +870,52 @@ describe("XRechnung BR-DE / PEPPOL rules", () => {
     expect(buyerRefErrors).toHaveLength(0);
   });
 });
+
+describe("Document reference cardinality", () => {
+  it("rejects two references of a single-occurrence type", () => {
+    const result = validateInput(
+      createBasicWlInput({
+        references: [
+          { id: "PO-1", type: "order" },
+          { id: "PO-2", type: "order" },
+        ],
+      }),
+      Profile.BASIC_WL,
+    );
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({
+        field: "references",
+        message: 'Only one "order" reference is allowed, got 2.',
+      }),
+    );
+  });
+
+  it("rejects a despatch reference next to delivery.despatchAdviceReference", () => {
+    const result = validateInput(
+      createBasicWlInput({
+        delivery: { despatchAdviceReference: "DA-1" },
+        references: [{ id: "DA-2", type: "despatch" }],
+      }),
+      Profile.BASIC_WL,
+    );
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.field === "references")).toBe(true);
+  });
+
+  it("allows one reference per type plus several preceding invoices", () => {
+    const result = validateInput(
+      createEn16931Input({
+        references: [
+          { id: "PO-1", type: "order" },
+          { id: "SO-1", type: "seller-order" },
+          { id: "CT-1", type: "contract" },
+          { id: "INV-1", type: "preceding" },
+          { id: "INV-2", type: "preceding" },
+        ],
+      }),
+      Profile.EN16931,
+    );
+    expect(result.errors.filter((e) => e.field === "references")).toEqual([]);
+  });
+});
