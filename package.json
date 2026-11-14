@@ -41,7 +41,7 @@
     "type": "git",
     "url": "git+https://github.com/StackForge-EU/factur-x.git"
   },
-  "homepage": "https://www.stack-forge.eu",
+  "homepage": "https://factur-x.deployo.eu",
   "bugs": {
     "url": "https://github.com/StackForge-EU/factur-x/issues"
   },
