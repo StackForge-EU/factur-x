@@ -1,0 +1,122 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit reviews pull requests: useful, low noise, nothing kept or shared
+# beyond the review itself.
+language: en-US
+tone_instructions: >-
+  Be brief and concrete. Plain English. Only comment when something is wrong,
+  risky or clearly simpler another way.
+early_access: false
+reviews:
+  profile: chill
+  # No automatic approvals or change requests; maintainers decide.
+  auto_approvals:
+    enabled: false
+  high_level_summary: true
+  poem: false
+  in_progress_fortune: false
+  sequence_diagrams: false
+  estimate_code_review_effort: false
+  related_issues: false
+  related_prs: false
+  suggested_labels: false
+  suggested_reviewers: false
+  collapse_walkthrough: true
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches: ["^main$"]
+  path_filters:
+    - "!package-lock.json"
+    - "!deno.lock"
+    # Official Factur-X / CII schema files, vendored unchanged.
+    - "!schema/**/*.{xsd,sch,xml,xlsx,xslt,xsl}"
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+    title:
+      mode: warning
+      requirements: >-
+        Conventional Commits with a short subject, e.g. "fix: emit header
+        references in XSD order". Types: feat, fix, docs, refactor, test,
+        build, ci, chore, perf, release.
+  path_instructions:
+    - path: "src/**/*.ts"
+      instructions: |
+        A library that writes legally relevant invoices (EN 16931, Factur-X, ZUGFeRD,
+        XRechnung). Flag any change that breaks one of these:
+        - Generated XML stays valid against the profile's XSD: element order follows the CII
+          sequence, not input order, and an element is only emitted for profiles that allow it.
+        - Every user-supplied string written to XML goes through escapeXml.
+        - Amounts are rounded with src/core/rounding.ts (half away from zero, per written
+          amount). No bare Math.round or toFixed on money. The XML builder and validateInput
+          must derive the same numbers, or a correct invoice is rejected.
+        - A business rule (BR-*) enforced in validateInput matches what buildXml writes.
+        - The package runs on Node 18+ and Deno, on Windows as well as POSIX: schema paths are
+          resolved portably, no Node-only API without a fallback.
+        - A change to an exported name, type or default is a breaking change unless it is
+          additive; it needs a CHANGELOG entry that says so.
+        TypeScript strict: no `any`, prefer inferred types, no one-line functions that only
+        cast. Public APIs carry JSDoc (@param, @returns, @throws); invoice fields reference
+        their EN 16931 business term (e.g. BT-131). Comments are concise and updated with the
+        code.
+    - path: "src/types/**"
+      instructions: |
+        The input types are the public contract. New fields are optional unless the profile
+        requires them, are documented in docs/INPUT_OBJECT_SPECIFICATION.md, and name their
+        EN 16931 business term.
+    - path: "tests/**"
+      instructions: |
+        Tests should pin behaviour: the exact XML written, the rule that rejects an input,
+        the rounded amount. Flag smoke tests that check nothing specific and fixtures with
+        real company or personal data; invoice fixtures must be made up.
+    - path: "CHANGELOG.md"
+      instructions: |
+        Entries go under "## [Unreleased]" (release notes are built from it), describe the
+        effect for users of the library and match what the code does.
+    - path: "{package.json,jsr.json}"
+      instructions: |
+        The version is the same in both files. A file the package needs at run time (schema
+        XSDs) must be listed in both "files" (npm) and "publish.include" (JSR). New run-time
+        dependencies need a reason: the package has two.
+    - path: ".github/**"
+      instructions: |
+        Never print secrets. Release and publish steps must fail loudly instead of publishing
+        an incomplete or mismatched version, and stay safe to re-run.
+    - path: "**/*.md"
+      instructions: |
+        Plain, short English. Facts (profiles, field names, defaults, supported runtimes) must
+        match the code. No marketing language.
+
+chat:
+  art: false
+  auto_reply: false
+  integrations:
+    jira:
+      usage: disabled
+    linear:
+      usage: disabled
+
+knowledge_base:
+  # No data kept between reviews (learnings, indexed issues and PRs).
+  opt_out: true
+  web_search:
+    enabled: false
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - CONTRIBUTING.md
+      - docs/ARCHITECTURE.md
+      - docs/PROFILES_AND_FLAVORS.md
+  jira:
+    usage: disabled
+  linear:
+    usage: disabled
+  mcp:
+    usage: disabled
+  automatic_linking_mode: disabled
+
+issue_enrichment:
+  auto_enrich:
+    enabled: false
+  planning:
+    enabled: false
