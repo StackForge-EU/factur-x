@@ -894,23 +894,23 @@ describe("Untested XML elements", () => {
   });
 
   it("includes global ID on seller", () => {
-    const input = createMinimumInput({
+    const input = createBasicWlInput({
       seller: {
-        ...createMinimumInput().seller,
+        ...createBasicWlInput().seller,
         globalId: {
           value: "4000001000005",
           schemeID: "0088",
         },
       },
     });
-    const xml = buildXml(input, Profile.MINIMUM);
+    const xml = buildXml(input, Profile.BASIC_WL);
     expect(xml).toContain('<ram:GlobalID schemeID="0088">4000001000005</ram:GlobalID>');
   });
 
   it("includes legal organization ID scheme on seller", () => {
-    const input = createMinimumInput({
+    const input = createBasicWlInput({
       seller: {
-        ...createMinimumInput().seller,
+        ...createBasicWlInput().seller,
         legalOrganization: {
           id: "HRB 12345",
           schemeID: "0002",
@@ -918,7 +918,7 @@ describe("Untested XML elements", () => {
         },
       },
     });
-    const xml = buildXml(input, Profile.MINIMUM);
+    const xml = buildXml(input, Profile.BASIC_WL);
     expect(xml).toContain(
       '<ram:SpecifiedLegalOrganization><ram:ID schemeID="0002">HRB 12345</ram:ID><ram:TradingBusinessName>StackForge</ram:TradingBusinessName></ram:SpecifiedLegalOrganization>',
     );
@@ -932,13 +932,13 @@ describe("Untested XML elements", () => {
   });
 
   it("includes multiple seller IDs", () => {
-    const input = createMinimumInput({
+    const input = createBasicWlInput({
       seller: {
-        ...createMinimumInput().seller,
+        ...createBasicWlInput().seller,
         id: ["ID-A", "ID-B"],
       },
     });
-    const xml = buildXml(input, Profile.MINIMUM);
+    const xml = buildXml(input, Profile.BASIC_WL);
     expect(xml).toContain("<ram:ID>ID-A</ram:ID>");
     expect(xml).toContain("<ram:ID>ID-B</ram:ID>");
   });

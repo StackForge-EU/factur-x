@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **Fixed MINIMUM XML failing XSD validation when optional party fields are
+  set.** `buildXml` wrote a party's `id`, `globalId`,
+  `legalOrganization.tradingName` and `electronicAddress` in every profile,
+  but the MINIMUM schema allows none of them. They are now dropped for
+  MINIMUM, like `address` and `contact` already were, and still written from
+  BASIC WL upwards (#28).
+
 ## [1.4.5] — 2026-11-14
 
 - **Fixed derived line net amount ignoring `basisQuantity`.** When a line

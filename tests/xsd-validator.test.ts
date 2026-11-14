@@ -23,6 +23,34 @@ describe("validateXsd", () => {
     expect(result.errors).toHaveLength(0);
   });
 
+  it("drops party fields the MINIMUM schema does not allow", async () => {
+    const party = {
+      id: "PARTY-1",
+      globalId: { value: "4000001123452", schemeID: "0088" },
+      legalOrganization: { id: "HRB 15051", schemeID: "0002", tradingName: "StackForge" },
+      contact: { name: "Billing", email: "billing@stack-forge.eu" },
+      address: { line1: "Bergstraße 4", city: "Weihmichl", postalCode: "84107", country: "DE" },
+      electronicAddress: { value: "billing@stack-forge.eu", schemeID: "EM" },
+    };
+    const base = createMinimumInput();
+    const input = {
+      ...base,
+      seller: { ...base.seller, ...party },
+      buyer: { ...base.buyer, ...party },
+    };
+
+    const minimum = await validateXsd(buildXml(input, Profile.MINIMUM), Profile.MINIMUM, {
+      schemaBasePath,
+    });
+    expect(minimum.errors).toEqual([]);
+
+    // The same fields are part of BASIC WL and must still be written there.
+    const basicWl = buildXml({ ...createBasicWlInput(), seller: input.seller }, Profile.BASIC_WL);
+    expect(basicWl).toContain("ram:URIUniversalCommunication");
+    expect(basicWl).toContain("ram:GlobalID");
+    expect(basicWl).toContain("ram:TradingBusinessName");
+  });
+
   it("validates valid BASIC_WL XML", async () => {
     const xml = buildXml(createBasicWlInput(), Profile.BASIC_WL);
     const result = await validateXsd(xml, Profile.BASIC_WL, { schemaBasePath });

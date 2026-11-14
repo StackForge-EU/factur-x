@@ -129,12 +129,15 @@ function buildContact(c: ContactInput): string {
 
 function buildParty(p: TradePartyInput, profile: Profile): string {
   let x = "";
+  // MINIMUM parties carry only name, legal registration ID, country and tax
+  // registration; its XSD rejects every other party element.
+  const beyondMinimum = atLeast(profile, Profile.BASIC_WL);
 
-  if (p.id) {
+  if (p.id && beyondMinimum) {
     const ids = Array.isArray(p.id) ? p.id : [p.id];
     for (const id of ids) x += tag("ram:ID", escapeXml(id));
   }
-  if (p.globalId) {
+  if (p.globalId && beyondMinimum) {
     x += tag("ram:GlobalID", escapeXml(p.globalId.value), { schemeID: p.globalId.schemeID });
   }
 
@@ -152,15 +155,15 @@ function buildParty(p: TradePartyInput, profile: Profile): string {
         p.legalOrganization.schemeID ? { schemeID: p.legalOrganization.schemeID } : undefined,
       );
     }
-    if (p.legalOrganization.tradingName)
+    if (p.legalOrganization.tradingName && beyondMinimum)
       lo += tag("ram:TradingBusinessName", escapeXml(p.legalOrganization.tradingName));
     x += tag("ram:SpecifiedLegalOrganization", lo);
   }
 
   if (p.contact && atLeast(profile, Profile.EN16931)) x += buildContact(p.contact);
-  if (p.address && atLeast(profile, Profile.BASIC_WL)) x += buildAddress(p.address);
+  if (p.address && beyondMinimum) x += buildAddress(p.address);
 
-  if (p.electronicAddress)
+  if (p.electronicAddress && beyondMinimum)
     x += tag(
       "ram:URIUniversalCommunication",
       tag("ram:URIID", escapeXml(p.electronicAddress.value), {
