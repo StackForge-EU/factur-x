@@ -751,7 +751,8 @@ export interface InvoiceLineInput {
   basisQuantityUnitCode?: UnitCode | (string & Record<never, never>);
 
   /**
-   * Line total (net) — can be derived from `quantity * unitPrice`.
+   * Line total (net). Derived as `quantity * unitPrice / (basisQuantity ?? 1)`,
+   * rounded to two decimals, when omitted.
    * @see EN 16931 BT-131
    */
   lineTotal?: number;

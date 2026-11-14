@@ -1013,6 +1013,21 @@ describe("Untested XML elements", () => {
     expect(xml).toContain("<ram:LineTotalAmount>300.00</ram:LineTotalAmount>");
   });
 
+  it("divides the derived lineTotal by basisQuantity (BT-149)", () => {
+    const input = createEn16931Input();
+    input.lines[0] = {
+      id: "1",
+      name: "Screws, price per 100",
+      quantity: 250,
+      unitPrice: 12.5,
+      basisQuantity: 100,
+      vatCategoryCode: VatCategoryCode.STANDARD_RATE,
+      vatRatePercent: 19,
+    };
+    const xml = buildXml(input, Profile.EN16931);
+    expect(xml).toContain("<ram:LineTotalAmount>31.25</ram:LineTotalAmount>");
+  });
+
   it("uses explicit lineTotal when provided", () => {
     const input = createEn16931Input({
       lines: [

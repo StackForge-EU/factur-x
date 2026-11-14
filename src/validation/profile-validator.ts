@@ -9,7 +9,7 @@
 
 import { Profile, Flavor } from "../flavors/constants";
 import type { FacturXInvoiceInput } from "../types/input";
-import { roundHalfUp, toCents } from "../core/rounding";
+import { deriveLineNet, roundHalfUp, toCents } from "../core/rounding";
 
 /** Profile order for cumulative requirement checks */
 const PROFILE_LEVEL: Record<Profile, number> = {
@@ -244,6 +244,14 @@ export function validateInput(
         if (line.unitPrice == null) {
           addError(errors, `lines[${i}].unitPrice`, "Line unit price is required", Profile.BASIC);
         }
+        if (line.basisQuantity != null && !(line.basisQuantity > 0)) {
+          addError(
+            errors,
+            `lines[${i}].basisQuantity`,
+            "Line price base quantity (BT-149) must be greater than zero",
+            Profile.BASIC,
+          );
+        }
       });
     }
   }
@@ -361,16 +369,13 @@ export function validateInput(
   }
 
   // BR-CO-10: Sum of Invoice line net amount (BT-106) = Σ Invoice line net
-  // amount (BT-131). Falls back to quantity × unitPrice when line.lineTotal
-  // is omitted, mirroring the XML builder's behaviour.
+  // amount (BT-131). Derives the amount the XML builder would write when
+  // line.lineTotal is omitted; lines it cannot be derived for (missing
+  // quantity or price, zero basisQuantity) are reported above and count as 0.
   if (req(Profile.BASIC) && input.totals && input.lines) {
     const sumLineNets = input.lines.reduce((sum, l) => {
-      const lineNet =
-        l.lineTotal ??
-        (typeof l.quantity === "number" && typeof l.unitPrice === "number"
-          ? l.quantity * l.unitPrice
-          : 0);
-      return sum + lineNet;
+      const lineNet = l.lineTotal ?? deriveLineNet(l);
+      return sum + (Number.isFinite(lineNet) ? lineNet : 0);
     }, 0);
     if (input.totals.lineTotal != null) {
       if (amountsDiffer(input.totals.lineTotal, sumLineNets)) {

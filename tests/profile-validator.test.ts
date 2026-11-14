@@ -690,6 +690,42 @@ describe("BR-CO-10 sum of line nets equals lineTotal", () => {
   });
 });
 
+describe("line net derived from basisQuantity (BT-149)", () => {
+  const perHundred = (basisQuantity: number) => {
+    const base = createBasicInput();
+    return createBasicInput({
+      lines: [
+        {
+          ...base.lines![0],
+          quantity: 250,
+          unitPrice: 12.5,
+          basisQuantity,
+          lineTotal: undefined,
+        },
+      ],
+      totals: {
+        ...base.totals!,
+        lineTotal: 31.25,
+        taxBasisTotal: 31.25,
+        taxTotal: 5.94,
+        grandTotal: 37.19,
+        duePayableAmount: 37.19,
+      },
+      vatBreakdown: [{ categoryCode: "S", ratePercent: 19, taxableAmount: 31.25, taxAmount: 5.94 }],
+    });
+  };
+
+  it("accepts totals.lineTotal matching quantity × unitPrice / basisQuantity", () => {
+    const result = validateInput(perHundred(100), Profile.BASIC);
+    expect(result.errors).toEqual([]);
+  });
+
+  it("rejects a basisQuantity of zero", () => {
+    const result = validateInput(perHundred(0), Profile.BASIC);
+    expect(result.errors.map((e) => e.field)).toContain("lines[0].basisQuantity");
+  });
+});
+
 describe("BR-CO-13 taxBasisTotal composition", () => {
   it("rejects when taxBasisTotal != lineTotal - allowance + charge", () => {
     const input = createBasicInput({
