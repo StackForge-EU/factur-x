@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **Fixed derived line net amount ignoring `basisQuantity`.** When a line
+  omits `lineTotal`, `buildXml` and the BR-CO-10 check in `validateInput`
+  computed it as `quantity * unitPrice`, so a price per 100 units produced a
+  line total 100× too high and a correct `totals.lineTotal` was rejected. The
+  amount is now `quantity * unitPrice / basisQuantity` (EN 16931 BT-131),
+  rounded per line in both places. Reported by @trackoor (#26).
+- **`validateInput` rejects a `basisQuantity` that is not greater than zero.**
+
 ## [1.4.4] — 2026-11-09
 
 - **Fixed header reference element order.** `buildXml` emitted

@@ -14,7 +14,7 @@ import type {
 import { Profile, Flavor, PROFILE_URNS, XRECHNUNG_PROFILE_URN } from "../flavors/constants";
 
 import { resolveTypeCode } from "../flavors/registry";
-import { roundHalfUp } from "./rounding";
+import { deriveLineNet, roundHalfUp } from "./rounding";
 
 // ---------------------------------------------------------------------------
 // Profile level comparison
@@ -260,8 +260,7 @@ function buildLineItem(line: InvoiceLineInput, profile: Profile): string {
       tx += tag("ram:RateApplicablePercent", line.vatRatePercent.toString());
     settle += tag("ram:ApplicableTradeTax", tx);
   }
-  // Round the fallback to currency precision so 0.1 × 3 ≠ 0.30000000000000004.
-  const lineTotal = line.lineTotal ?? roundHalfUp(line.quantity * line.unitPrice);
+  const lineTotal = line.lineTotal ?? deriveLineNet(line);
   settle += tag(
     "ram:SpecifiedTradeSettlementLineMonetarySummation",
     tag("ram:LineTotalAmount", fmtAmt(lineTotal)),
