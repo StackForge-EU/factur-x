@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.5] — 2026-11-14
+
 - **Fixed derived line net amount ignoring `basisQuantity`.** When a line
   omits `lineTotal`, `buildXml` and the BR-CO-10 check in `validateInput`
   computed it as `quantity * unitPrice`, so a price per 100 units produced a
@@ -299,6 +301,7 @@ This element is not expected`. Reordered the three blocks in
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.4.5]: https://github.com/StackForge-EU/factur-x/compare/v1.4.4...v1.4.5
 [1.4.4]: https://github.com/StackForge-EU/factur-x/compare/v1.4.3...v1.4.4
 [1.4.3]: https://github.com/StackForge-EU/factur-x/compare/v1.4.2...v1.4.3
 [1.4.2]: https://github.com/StackForge-EU/factur-x/compare/v1.4.1...v1.4.2
