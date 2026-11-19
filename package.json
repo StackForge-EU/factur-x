@@ -1,6 +1,6 @@
 {
   "name": "@stackforge-eu/factur-x",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "type": "module",
   "description": "Factur-X, ZUGFeRD and XRechnung e-invoice library (E-Rechnung / eRechnung, facture électronique): build EN 16931 CII XML, embed it into PDF/A-3, validate and extract",
   "keywords": [

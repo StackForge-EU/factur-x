@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.7] — 2026-11-19
+
 - **Fixed empty and scheme-less `ram:GlobalID` on parties and line items.**
   A `globalId` (seller, buyer, payee, tax representative, manufacturer) or a
   line `standardIdentifier` without a `value` is no longer written as an
@@ -326,6 +328,7 @@ This element is not expected`. Reordered the three blocks in
 - Deno compatibility test suite
 
 [Unreleased]: https://github.com/StackForge-EU/factur-x/commits/main
+[1.4.7]: https://github.com/StackForge-EU/factur-x/compare/v1.4.6...v1.4.7
 [1.4.6]: https://github.com/StackForge-EU/factur-x/compare/v1.4.5...v1.4.6
 [1.4.5]: https://github.com/StackForge-EU/factur-x/compare/v1.4.4...v1.4.5
 [1.4.4]: https://github.com/StackForge-EU/factur-x/compare/v1.4.3...v1.4.4
