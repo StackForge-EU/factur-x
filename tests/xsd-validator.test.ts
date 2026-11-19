@@ -106,6 +106,37 @@ describe("validateXsd", () => {
     expect(result.errors).toHaveLength(0);
   });
 
+  it.each([
+    [Profile.BASIC_WL, createBasicWlInput],
+    [Profile.BASIC, createBasicInput],
+    [Profile.EN16931, createEn16931Input],
+    [Profile.EXTENDED, createExtendedInput],
+  ] as const)(
+    "validates %s XML with a deliver-to location identifier (BT-71 element order)",
+    async (profile, create) => {
+      // TradePartyType requires ID and GlobalID before Name and PostalTradeAddress.
+      const input = create({
+        delivery: {
+          date: "2025-06-18",
+          id: "STORE-17",
+          globalId: { value: "4000001000005", schemeID: "0088" },
+          partyName: "Store Musterstadt",
+          location: {
+            line1: "Marktplatz 1",
+            city: "Musterstadt",
+            postalCode: "12345",
+            country: "DE",
+          },
+        },
+      });
+      const xml = buildXml(input, profile);
+      expect(xml).toContain('<ram:GlobalID schemeID="0088">4000001000005</ram:GlobalID>');
+      const result = await validateXsd(xml, profile, { schemaBasePath });
+      expect(result.errors).toHaveLength(0);
+      expect(result.valid).toBe(true);
+    },
+  );
+
   it("validates EN16931 XML with a price base quantity (BT-149/BT-150 element order)", async () => {
     // TradePriceType requires BasisQuantity to come after ChargeAmount and
     // before AppliedTradeAllowanceCharge — wrong ordering fails XSD validation.
