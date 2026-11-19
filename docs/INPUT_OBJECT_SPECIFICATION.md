@@ -73,6 +73,24 @@ interface FacturXInvoiceInput {
 | `taxRegistrations`  | `TaxRegistrationInput[]?`    | BT-31/48 |   ✅    |    ✅    |    ✅    |
 | `legalOrganization` | `LegalOrganizationInput?`    | BT-30/47 |   ✅    |    ✅    |    ✅    |
 
+### DeliveryInput
+
+| Field                     | Type                         | BT         | BASIC WL | EN 16931 |
+| ------------------------- | ---------------------------- | ---------- | :------: | :------: |
+| `date`                    | `string?`                    | BT-72      |    ✅    |    ✅    |
+| `partyName`               | `string?`                    | BT-70      |    ✅    |    ✅    |
+| `id`                      | `string?`                    | BT-71      |    ✅    |    ✅    |
+| `globalId`                | `IdentifierWithSchemeInput?` | BT-71/71-1 |    ✅    |    ✅    |
+| `location`                | `AddressInput?`              | BG-15      |    ✅    |    ✅    |
+| `despatchAdviceReference` | `string?`                    | BT-16      |    ✅    |    ✅    |
+
+`id` and `globalId` name the deliver-to location: `id` is written as
+`ram:ShipToTradeParty/ram:ID` without a scheme, `globalId` as
+`ram:ShipToTradeParty/ram:GlobalID` with its `schemeID`, e.g. a GLN with
+`0088`. EN 16931 has one deliver-to location identifier, so set one of the
+two — with both, the CEN rule CII-SR-449 warns. Nothing of the delivery
+block is written for MINIMUM.
+
 ### InvoiceLineInput
 
 | Field                   | Type                         | BT     | BASIC | EN 16931 |

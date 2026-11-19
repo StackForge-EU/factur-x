@@ -295,6 +295,20 @@ export function validateInput(
     }
   }
 
+  // BT-71-1: ram:ShipToTradeParty/ram:GlobalID requires @schemeID (Factur-X
+  // schematron). Fail here with a clear message instead of in buildXml.
+  if (req(Profile.BASIC_WL)) {
+    const globalId = input.delivery?.globalId;
+    if (globalId?.value && !globalId.schemeID) {
+      addError(
+        errors,
+        "delivery.globalId.schemeID",
+        "Deliver-to location identifier must include schemeID (BT-71-1), e.g. 0088 for a GLN. Use delivery.id for an identifier without a scheme.",
+        Profile.BASIC_WL,
+      );
+    }
+  }
+
   // BR-27: Item net price (BT-146) shall NOT be negative. The Factur-X
   // schematron rejects negative `NetPriceProductTradePrice/ChargeAmount`.
   // Discounts must be expressed via allowancesCharges, not negative prices.

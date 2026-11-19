@@ -1019,6 +1019,37 @@ export interface DeliveryInput {
   partyName?: string;
 
   /**
+   * Deliver-to location identifier without a scheme, e.g. the buyer's own
+   * number for the delivery site. Emitted as `ram:ID` of
+   * `ram:ShipToTradeParty`. For a registered identifier such as a GLN use
+   * {@link DeliveryInput.globalId}. EN 16931 has one deliver-to location
+   * identifier: set either `id` or `globalId` — with both, the CEN rule
+   * CII-SR-449 warns.
+   * @see EN 16931 BT-71
+   * @since BASIC_WL
+   */
+  id?: string;
+
+  /**
+   * Deliver-to location identifier with its scheme, e.g. the GLN of the
+   * delivery site — `{ value: "4000001000005", schemeID: "0088" }`. Emitted as
+   * `ram:GlobalID` of `ram:ShipToTradeParty`; retailers match an invoice to
+   * the store or warehouse it was delivered to by this identifier. Set either
+   * `globalId` or {@link DeliveryInput.id}, not both (CII-SR-449).
+   * @see EN 16931 BT-71, BT-71-1
+   * @since BASIC_WL
+   * @example
+   * ```ts
+   * delivery: {
+   *   partyName: "Store Musterstadt",
+   *   globalId: { value: "4000001000005", schemeID: "0088" },
+   *   location: { line1: "Marktplatz 1", city: "Musterstadt", postalCode: "12345", country: "DE" },
+   * }
+   * ```
+   */
+  globalId?: IdentifierWithSchemeInput;
+
+  /**
    * Despatch advice reference.
    * @see EN 16931 BT-16
    */

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **Added the deliver-to location identifier (BT-71).** New optional `id`
+  and `globalId` fields on `DeliveryInput` emit `ram:ID` and
+  `ram:GlobalID` (with its `schemeID`, BT-71-1) in `ram:ShipToTradeParty`,
+  ahead of the name and the address as the XSD sequence requires, so an
+  invoice can name the store or warehouse it was delivered to by its GLN
+  (`schemeID` `0088`) — retail chains match invoices to delivery sites by
+  it. Written from BASIC WL upwards; the ship-to party is now also emitted
+  when it carries only an identifier. Omitting the fields keeps the output
+  byte-for-byte identical.
+
 ## [1.4.6] — 2026-11-14
 
 - **Fixed MINIMUM XML failing XSD validation when optional party fields are

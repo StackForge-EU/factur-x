@@ -434,6 +434,91 @@ describe("Rounding amount (BT-114)", () => {
   });
 });
 
+describe("Deliver-to location identifier (BT-71)", () => {
+  const location = {
+    line1: "Marktplatz 1",
+    city: "Musterstadt",
+    postalCode: "12345",
+    country: "DE",
+  };
+
+  it("emits ID and GlobalID before Name in ShipToTradeParty (XSD element order)", () => {
+    // Both together are XSD-valid (CII-SR-449 only warns); set here to pin the order.
+    const input = createEn16931Input({
+      delivery: {
+        date: "2025-06-18",
+        id: "STORE-17",
+        globalId: { value: "4000001000005", schemeID: "0088" },
+        partyName: "Store Musterstadt",
+        location,
+      },
+    });
+    const xml = buildXml(input, Profile.EN16931);
+    expect(xml).toContain(
+      "<ram:ShipToTradeParty>" +
+        "<ram:ID>STORE-17</ram:ID>" +
+        '<ram:GlobalID schemeID="0088">4000001000005</ram:GlobalID>' +
+        "<ram:Name>Store Musterstadt</ram:Name>" +
+        "<ram:PostalTradeAddress>",
+    );
+  });
+
+  it("emits ShipToTradeParty when it carries only a GlobalID", () => {
+    const input = createEn16931Input({
+      delivery: {
+        date: "2025-06-18",
+        globalId: { value: "4000001000005", schemeID: "0088" },
+      },
+    });
+    const xml = buildXml(input, Profile.EN16931);
+    expect(xml).toContain(
+      '<ram:ShipToTradeParty><ram:GlobalID schemeID="0088">4000001000005</ram:GlobalID></ram:ShipToTradeParty>',
+    );
+  });
+
+  it("emits ShipToTradeParty when it carries only an ID (no schemeID)", () => {
+    const input = createBasicWlInput({
+      delivery: { date: "2025-06-18", id: "STORE-17" },
+    });
+    const xml = buildXml(input, Profile.BASIC_WL);
+    expect(xml).toContain("<ram:ShipToTradeParty><ram:ID>STORE-17</ram:ID></ram:ShipToTradeParty>");
+  });
+
+  it("treats a GlobalID without a value as absent", () => {
+    const input = createEn16931Input({
+      delivery: { date: "2025-06-18", globalId: { value: "", schemeID: "0088" } },
+    });
+    const xml = buildXml(input, Profile.EN16931);
+    expect(xml).not.toContain("ShipToTradeParty");
+  });
+
+  it("escapes the identifiers", () => {
+    const input = createEn16931Input({
+      delivery: {
+        date: "2025-06-18",
+        id: "A&B",
+        globalId: { value: "<1>", schemeID: "0088" },
+      },
+    });
+    const xml = buildXml(input, Profile.EN16931);
+    expect(xml).toContain("<ram:ID>A&amp;B</ram:ID>");
+    expect(xml).toContain('<ram:GlobalID schemeID="0088">&lt;1&gt;</ram:GlobalID>');
+  });
+
+  it("drops the delivery block, identifiers included, for MINIMUM", () => {
+    const input = createMinimumInput({
+      delivery: { globalId: { value: "4000001000005", schemeID: "0088" } },
+    });
+    const xml = buildXml(input, Profile.MINIMUM);
+    expect(xml).not.toContain("ShipToTradeParty");
+  });
+
+  it("omits ShipToTradeParty when no deliver-to field is provided (output unchanged)", () => {
+    const xml = buildXml(createEn16931Input(), Profile.EN16931);
+    expect(xml).not.toContain("ShipToTradeParty");
+  });
+});
+
 describe("Edge cases", () => {
   it("escapes XML special characters in seller name", () => {
     const input = createMinimumInput({

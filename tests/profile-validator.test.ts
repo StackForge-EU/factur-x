@@ -939,6 +939,16 @@ describe("Document reference cardinality", () => {
     expect(result.errors.some((e) => e.field === "references")).toBe(true);
   });
 
+  it("rejects a delivery.globalId without schemeID", () => {
+    const delivery = { globalId: { value: "4000001000005", schemeID: "" } };
+    const result = validateInput(createBasicWlInput({ delivery }), Profile.BASIC_WL);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.field === "delivery.globalId.schemeID")).toBe(true);
+
+    delivery.globalId.schemeID = "0088";
+    expect(validateInput(createBasicWlInput({ delivery }), Profile.BASIC_WL).valid).toBe(true);
+  });
+
   it("allows one reference per type plus several preceding invoices", () => {
     const result = validateInput(
       createEn16931Input({
