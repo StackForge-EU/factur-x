@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- **Fixed empty and scheme-less `ram:GlobalID` on parties and line items.**
+  A `globalId` (seller, buyer, payee, tax representative, manufacturer) or a
+  line `standardIdentifier` without a `value` is no longer written as an
+  empty element, and `validateInput` now reports one that has a value but no
+  `schemeID` instead of `buildXml` failing with a `TypeError`.
+
 - **Added the deliver-to location identifier (BT-71).** New optional `id`
   and `globalId` fields on `DeliveryInput` emit `ram:ID` and
   `ram:GlobalID` (with its `schemeID`, BT-71-1) in `ram:ShipToTradeParty`,

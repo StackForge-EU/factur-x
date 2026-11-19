@@ -949,6 +949,34 @@ describe("Document reference cardinality", () => {
     expect(validateInput(createBasicWlInput({ delivery }), Profile.BASIC_WL).valid).toBe(true);
   });
 
+  it("rejects a party globalId and a line standardIdentifier without schemeID", () => {
+    const base = createEn16931Input();
+    const noScheme = { value: "4000001000005", schemeID: "" };
+    const result = validateInput(
+      createEn16931Input({
+        buyer: { ...base.buyer, globalId: noScheme },
+        lines: base.lines?.map((line) => ({
+          ...line,
+          standardIdentifier: noScheme,
+          // Only written for EXTENDED, so not checked below it.
+          manufacturer: { name: "Maker", globalId: noScheme },
+        })),
+      }),
+      Profile.EN16931,
+    );
+    const fields = result.errors.map((e) => e.field);
+    expect(fields).toEqual(
+      expect.arrayContaining(["buyer.globalId.schemeID", "lines[0].standardIdentifier.schemeID"]),
+    );
+    expect(fields).not.toContain("lines[0].manufacturer.globalId.schemeID");
+
+    // A value made only of control characters is never written, so no scheme is needed.
+    const unwritten = createEn16931Input({
+      buyer: { ...base.buyer, globalId: { value: "\x00", schemeID: "" } },
+    });
+    expect(validateInput(unwritten, Profile.EN16931).valid).toBe(true);
+  });
+
   it("allows one reference per type plus several preceding invoices", () => {
     const result = validateInput(
       createEn16931Input({
