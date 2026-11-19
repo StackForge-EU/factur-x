@@ -300,8 +300,9 @@ export function validateInput(
   // written: parties and the deliver-to location from BASIC WL, the line
   // identifier from BASIC, the line manufacturer from EXTENDED. Fail here with
   // a clear message instead of in buildXml. An identifier without a value is
-  // not written at all, so it is not checked. escapeXml strips control
-  // characters, so a schemeID made only of those is as missing as an empty one.
+  // not written at all, so it is not checked. Both are judged as buildXml
+  // writes them: escapeXml strips control characters, so a value or schemeID
+  // made only of those counts as empty.
   const globalIds: (readonly [
     field: string,
     id: IdentifierWithSchemeInput | undefined,
@@ -320,7 +321,7 @@ export function validateInput(
     ),
   ];
   for (const [field, id, since] of globalIds) {
-    if (req(since) && id?.value && !escapeXml(id.schemeID ?? "")) {
+    if (req(since) && escapeXml(id?.value ?? "") && !escapeXml(id?.schemeID ?? "")) {
       addError(
         errors,
         `${field}.schemeID`,

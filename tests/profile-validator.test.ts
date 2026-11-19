@@ -969,6 +969,12 @@ describe("Document reference cardinality", () => {
       expect.arrayContaining(["buyer.globalId.schemeID", "lines[0].standardIdentifier.schemeID"]),
     );
     expect(fields).not.toContain("lines[0].manufacturer.globalId.schemeID");
+
+    // A value made only of control characters is never written, so no scheme is needed.
+    const unwritten = createEn16931Input({
+      buyer: { ...base.buyer, globalId: { value: "\x00", schemeID: "" } },
+    });
+    expect(validateInput(unwritten, Profile.EN16931).valid).toBe(true);
   });
 
   it("allows one reference per type plus several preceding invoices", () => {
