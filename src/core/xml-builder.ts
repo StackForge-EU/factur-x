@@ -484,19 +484,15 @@ export function buildXml(input: FacturXInvoiceInput, profile: Profile, flavor?: 
   let del = "";
   let hasActualDelivery = false;
   if (input.delivery && atLeast(profile, Profile.BASIC_WL)) {
-    if (
-      input.delivery.id ||
-      input.delivery.globalId ||
-      input.delivery.partyName ||
-      input.delivery.location
-    ) {
+    // An identifier without a value counts as absent, like the other fields:
+    // an empty ram:GlobalID (or a ship-to party holding only that) is invalid.
+    const globalId = input.delivery.globalId?.value ? input.delivery.globalId : undefined;
+    if (input.delivery.id || globalId || input.delivery.partyName || input.delivery.location) {
       let sp = "";
       // TradePartyType sequence: ID, GlobalID, Name, …, PostalTradeAddress.
       if (input.delivery.id) sp += tag("ram:ID", escapeXml(input.delivery.id));
-      if (input.delivery.globalId)
-        sp += tag("ram:GlobalID", escapeXml(input.delivery.globalId.value), {
-          schemeID: input.delivery.globalId.schemeID,
-        });
+      if (globalId)
+        sp += tag("ram:GlobalID", escapeXml(globalId.value), { schemeID: globalId.schemeID });
       if (input.delivery.partyName) sp += tag("ram:Name", escapeXml(input.delivery.partyName));
       if (input.delivery.location) sp += buildAddress(input.delivery.location);
       del += tag("ram:ShipToTradeParty", sp);
