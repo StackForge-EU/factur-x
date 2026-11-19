@@ -949,6 +949,21 @@ describe("Document reference cardinality", () => {
     expect(validateInput(createBasicWlInput({ delivery }), Profile.BASIC_WL).valid).toBe(true);
   });
 
+  it("rejects a party globalId and a line standardIdentifier without schemeID", () => {
+    const base = createEn16931Input();
+    const noScheme = { value: "4000001000005", schemeID: "" };
+    const result = validateInput(
+      createEn16931Input({
+        buyer: { ...base.buyer, globalId: noScheme },
+        lines: base.lines?.map((line) => ({ ...line, standardIdentifier: noScheme })),
+      }),
+      Profile.EN16931,
+    );
+    expect(result.errors.map((e) => e.field)).toEqual(
+      expect.arrayContaining(["buyer.globalId.schemeID", "lines[0].standardIdentifier.schemeID"]),
+    );
+  });
+
   it("allows one reference per type plus several preceding invoices", () => {
     const result = validateInput(
       createEn16931Input({

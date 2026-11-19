@@ -8,7 +8,7 @@
  */
 
 import { Profile, Flavor } from "../flavors/constants";
-import type { FacturXInvoiceInput } from "../types/input";
+import type { FacturXInvoiceInput, IdentifierWithSchemeInput } from "../types/input";
 import { deriveLineNet, roundHalfUp, toCents } from "../core/rounding";
 
 /** Profile order for cumulative requirement checks */
@@ -295,16 +295,34 @@ export function validateInput(
     }
   }
 
-  // BT-71-1: ram:ShipToTradeParty/ram:GlobalID requires @schemeID (Factur-X
-  // schematron). Fail here with a clear message instead of in buildXml.
-  if (req(Profile.BASIC_WL)) {
-    const globalId = input.delivery?.globalId;
-    if (globalId?.value && !globalId.schemeID) {
+  // ram:GlobalID requires @schemeID (Factur-X schematron) wherever it is
+  // written: parties and the deliver-to location from BASIC WL, line items
+  // from BASIC. Fail here with a clear message instead of in buildXml. An
+  // identifier without a value is not written at all, so it is not checked.
+  const globalIds: (readonly [
+    field: string,
+    id: IdentifierWithSchemeInput | undefined,
+    since: Profile,
+  ])[] = [
+    ...(["seller", "buyer", "payee", "sellerTaxRepresentative"] as const).map(
+      (role) => [`${role}.globalId`, input[role]?.globalId, Profile.BASIC_WL] as const,
+    ),
+    ["delivery.globalId", input.delivery?.globalId, Profile.BASIC_WL],
+    ...(input.lines ?? []).flatMap(
+      (line, i) =>
+        [
+          [`lines[${i}].standardIdentifier`, line.standardIdentifier, Profile.BASIC],
+          [`lines[${i}].manufacturer.globalId`, line.manufacturer?.globalId, Profile.BASIC],
+        ] as const,
+    ),
+  ];
+  for (const [field, id, since] of globalIds) {
+    if (req(since) && id?.value && !id.schemeID) {
       addError(
         errors,
-        "delivery.globalId.schemeID",
-        "Deliver-to location identifier must include schemeID (BT-71-1), e.g. 0088 for a GLN. Use delivery.id for an identifier without a scheme.",
-        Profile.BASIC_WL,
+        `${field}.schemeID`,
+        `${field} must include schemeID, e.g. 0088 for a GLN.`,
+        since,
       );
     }
   }

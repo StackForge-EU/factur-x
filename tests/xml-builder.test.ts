@@ -492,6 +492,16 @@ describe("Deliver-to location identifier (BT-71)", () => {
     expect(xml).not.toContain("ShipToTradeParty");
   });
 
+  it("treats a party GlobalID and a line standardIdentifier without a value as absent", () => {
+    const base = createEn16931Input();
+    const empty = { value: "", schemeID: "0088" };
+    const input = createEn16931Input({
+      seller: { ...base.seller, globalId: empty },
+      lines: base.lines?.map((line) => ({ ...line, standardIdentifier: empty })),
+    });
+    expect(buildXml(input, Profile.EN16931)).not.toContain("ram:GlobalID");
+  });
+
   it("escapes the identifiers", () => {
     const input = createEn16931Input({
       delivery: {

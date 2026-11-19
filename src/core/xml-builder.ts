@@ -2,6 +2,7 @@ import { UnitCode, DocumentTypeCode } from "../types/input";
 import type {
   DocumentReferenceInput,
   FacturXInvoiceInput,
+  IdentifierWithSchemeInput,
   TradePartyInput,
   AddressInput,
   ContactInput,
@@ -127,6 +128,14 @@ function buildContact(c: ContactInput): string {
   return tag("ram:DefinedTradeContact", x);
 }
 
+/**
+ * `ram:GlobalID` with its `schemeID`, or nothing when the identifier has no
+ * value — an empty `ram:GlobalID` is invalid, so it counts as absent.
+ */
+function globalIdEl(id: IdentifierWithSchemeInput | undefined): string {
+  return id?.value ? tag("ram:GlobalID", escapeXml(id.value), { schemeID: id.schemeID }) : "";
+}
+
 function buildParty(p: TradePartyInput, profile: Profile): string {
   let x = "";
   // MINIMUM parties carry only name, legal registration ID, country and tax
@@ -137,9 +146,7 @@ function buildParty(p: TradePartyInput, profile: Profile): string {
     const ids = Array.isArray(p.id) ? p.id : [p.id];
     for (const id of ids) x += tag("ram:ID", escapeXml(id));
   }
-  if (p.globalId && beyondMinimum) {
-    x += tag("ram:GlobalID", escapeXml(p.globalId.value), { schemeID: p.globalId.schemeID });
-  }
+  if (beyondMinimum) x += globalIdEl(p.globalId);
 
   x += tag("ram:Name", escapeXml(p.name));
 
@@ -191,12 +198,7 @@ function buildLineItem(line: InvoiceLineInput, profile: Profile): string {
   let doc = tag("ram:LineID", escapeXml(line.id));
   if (line.note) doc += tag("ram:IncludedNote", tag("ram:Content", escapeXml(line.note)));
 
-  let prod = "";
-  if (line.standardIdentifier) {
-    prod += tag("ram:GlobalID", escapeXml(line.standardIdentifier.value), {
-      schemeID: line.standardIdentifier.schemeID,
-    });
-  }
+  let prod = globalIdEl(line.standardIdentifier);
   if (line.sellerAssignedId) prod += tag("ram:SellerAssignedID", escapeXml(line.sellerAssignedId));
   if (line.buyerAssignedId) prod += tag("ram:BuyerAssignedID", escapeXml(line.buyerAssignedId));
   prod += tag("ram:Name", escapeXml(line.name));
@@ -484,15 +486,12 @@ export function buildXml(input: FacturXInvoiceInput, profile: Profile, flavor?: 
   let del = "";
   let hasActualDelivery = false;
   if (input.delivery && atLeast(profile, Profile.BASIC_WL)) {
-    // An identifier without a value counts as absent, like the other fields:
-    // an empty ram:GlobalID (or a ship-to party holding only that) is invalid.
-    const globalId = input.delivery.globalId?.value ? input.delivery.globalId : undefined;
+    const globalId = globalIdEl(input.delivery.globalId);
     if (input.delivery.id || globalId || input.delivery.partyName || input.delivery.location) {
       let sp = "";
       // TradePartyType sequence: ID, GlobalID, Name, …, PostalTradeAddress.
       if (input.delivery.id) sp += tag("ram:ID", escapeXml(input.delivery.id));
-      if (globalId)
-        sp += tag("ram:GlobalID", escapeXml(globalId.value), { schemeID: globalId.schemeID });
+      sp += globalId;
       if (input.delivery.partyName) sp += tag("ram:Name", escapeXml(input.delivery.partyName));
       if (input.delivery.location) sp += buildAddress(input.delivery.location);
       del += tag("ram:ShipToTradeParty", sp);
