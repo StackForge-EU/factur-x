@@ -130,10 +130,13 @@ function buildContact(c: ContactInput): string {
 
 /**
  * `ram:GlobalID` with its `schemeID`, or nothing when the identifier has no
- * value — an empty `ram:GlobalID` is invalid, so it counts as absent.
+ * value left after escaping (which strips control characters) — an empty
+ * `ram:GlobalID` is invalid, so it counts as absent.
  */
 function globalIdEl(id: IdentifierWithSchemeInput | undefined): string {
-  return id?.value ? tag("ram:GlobalID", escapeXml(id.value), { schemeID: id.schemeID }) : "";
+  if (!id?.value) return "";
+  const value = escapeXml(id.value);
+  return value ? tag("ram:GlobalID", value, { schemeID: id.schemeID }) : "";
 }
 
 function buildParty(p: TradePartyInput, profile: Profile): string {

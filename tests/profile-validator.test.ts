@@ -955,13 +955,20 @@ describe("Document reference cardinality", () => {
     const result = validateInput(
       createEn16931Input({
         buyer: { ...base.buyer, globalId: noScheme },
-        lines: base.lines?.map((line) => ({ ...line, standardIdentifier: noScheme })),
+        lines: base.lines?.map((line) => ({
+          ...line,
+          standardIdentifier: noScheme,
+          // Only written for EXTENDED, so not checked below it.
+          manufacturer: { name: "Maker", globalId: noScheme },
+        })),
       }),
       Profile.EN16931,
     );
-    expect(result.errors.map((e) => e.field)).toEqual(
+    const fields = result.errors.map((e) => e.field);
+    expect(fields).toEqual(
       expect.arrayContaining(["buyer.globalId.schemeID", "lines[0].standardIdentifier.schemeID"]),
     );
+    expect(fields).not.toContain("lines[0].manufacturer.globalId.schemeID");
   });
 
   it("allows one reference per type plus several preceding invoices", () => {

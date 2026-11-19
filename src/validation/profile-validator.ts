@@ -10,6 +10,7 @@
 import { Profile, Flavor } from "../flavors/constants";
 import type { FacturXInvoiceInput, IdentifierWithSchemeInput } from "../types/input";
 import { deriveLineNet, roundHalfUp, toCents } from "../core/rounding";
+import { escapeXml } from "../core/xml-builder";
 
 /** Profile order for cumulative requirement checks */
 const PROFILE_LEVEL: Record<Profile, number> = {
@@ -296,9 +297,11 @@ export function validateInput(
   }
 
   // ram:GlobalID requires @schemeID (Factur-X schematron) wherever it is
-  // written: parties and the deliver-to location from BASIC WL, line items
-  // from BASIC. Fail here with a clear message instead of in buildXml. An
-  // identifier without a value is not written at all, so it is not checked.
+  // written: parties and the deliver-to location from BASIC WL, the line
+  // identifier from BASIC, the line manufacturer from EXTENDED. Fail here with
+  // a clear message instead of in buildXml. An identifier without a value is
+  // not written at all, so it is not checked. escapeXml strips control
+  // characters, so a schemeID made only of those is as missing as an empty one.
   const globalIds: (readonly [
     field: string,
     id: IdentifierWithSchemeInput | undefined,
@@ -312,12 +315,12 @@ export function validateInput(
       (line, i) =>
         [
           [`lines[${i}].standardIdentifier`, line.standardIdentifier, Profile.BASIC],
-          [`lines[${i}].manufacturer.globalId`, line.manufacturer?.globalId, Profile.BASIC],
+          [`lines[${i}].manufacturer.globalId`, line.manufacturer?.globalId, Profile.EXTENDED],
         ] as const,
     ),
   ];
   for (const [field, id, since] of globalIds) {
-    if (req(since) && id?.value && !id.schemeID) {
+    if (req(since) && id?.value && !escapeXml(id.schemeID ?? "")) {
       addError(
         errors,
         `${field}.schemeID`,
